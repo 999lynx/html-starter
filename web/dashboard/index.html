@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valor.gg — Staff Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #f472b6;
+  --accent-2: #c084fc;
+  --accent-grad: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #818cf8 100%);
+  --accent-glow: rgba(244, 114, 182, 0.25);
+  --bg: #07070d;
+  --surface-0: rgba(12, 12, 20, 0.9);
+  --surface-1: rgba(18, 18, 30, 0.75);
+  --surface-2: rgba(26, 26, 42, 0.6);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(244, 114, 182, 0.35);
+  --text: #f8fafc;
+  --dim: #94a3b8;
+  --dimmer: #64748b;
+  --ok: #34d399;
+  --danger: #f87171;
+  --warn: #fbbf24;
+  --radius: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: dark; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(circle at 80% -10%, rgba(244, 114, 182, 0.1), transparent 50%),
+    radial-gradient(circle at 20% 20%, rgba(192, 132, 252, 0.12), transparent 50%);
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+/* Header */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 26px; margin-bottom: 28px;
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius); backdrop-filter: blur(16px);
+}
+.logo-title {
+  font-family: 'Inter', sans-serif;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 22px; font-weight: 800;
+}
+.logo-badge {
+  background: rgba(251, 191, 36, 0.12); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.25);
+  font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;
+}
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+/* Buttons */
+button {
+  font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600;
+  padding: 9px 18px; border-radius: 10px; border: none;
+  cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+button.primary {
+  background: var(--accent-grad); color: #fff; box-shadow: 0 4px 15px var(--accent-glow);
+}
+button.primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+button.secondary {
+  background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+}
+button.secondary:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.06); }
+button.danger { background: rgba(248, 113, 113, 0.15); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.3); }
+button.danger:hover { background: rgba(248, 113, 113, 0.25); }
+button.ok { background: rgba(52, 211, 153, 0.15); color: var(--ok); border: 1px solid rgba(52, 211, 153, 0.3); }
+button.ok:hover { background: rgba(52, 211, 153, 0.25); }
+button.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+/* Stats Bar */
+.stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.stat-box {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px; backdrop-filter: blur(16px);
+}
+.stat-lbl { font-size: 11px; font-weight: 700; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.6px; }
+.stat-val { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 800; color: var(--text); margin-top: 4px; }
+
+/* Tabs */
+.tabs-nav {
+  display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 14px; padding: 6px; backdrop-filter: blur(16px);
+}
+.tab-item {
+  padding: 10px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  color: var(--dim); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 8px;
+}
+.tab-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+.tab-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.tab-item.active {
+  background: rgba(244, 114, 182, 0.15); color: var(--accent);
+  border: 1px solid rgba(244, 114, 182, 0.3);
+}
+.count-badge {
+  background: rgba(251, 191, 36, 0.2); color: #fbbf24;
+  padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+
+/* Glass Card & Table */
+.panel {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 26px; backdrop-filter: blur(16px);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.toolbar {
+  display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;
+}
+input, select, textarea {
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text); padding: 10px 14px; border-radius: 10px; font-size: 13.5px;
+  font-family: inherit; transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th {
+  text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.6px;
+}
+td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+td.mono { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+}
+.badge.active, .badge.approved, .badge.paid { background: rgba(52, 211, 153, 0.12); color: var(--ok); }
+.badge.unused { background: rgba(129, 140, 248, 0.12); color: #818cf8; }
+.badge.banned, .badge.denied { background: rgba(248, 113, 113, 0.12); color: var(--danger); }
+.badge.expired, .badge.pending { background: rgba(251, 191, 36, 0.12); color: var(--warn); }
+.badge.open { background: rgba(56, 189, 248, 0.12); color: #38bdf8; }
+.badge.closed { background: rgba(255, 255, 255, 0.05); color: var(--dim); }
+
+/* Modals */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 100;
+  padding: 20px;
+}
+.modal-bg.open { display: flex; }
+.modal-box {
+  background: #0d0d16; border: 1px solid var(--border);
+  border-radius: 20px; padding: 32px; width: 500px; max-width: 100%;
+}
+.modal-box h3 { font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+
+/* Login Modal */
+#adminAuth {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.auth-panel {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 24px; padding: 42px 36px; width: 400px; max-width: 100%;
+  backdrop-filter: blur(24px); box-shadow: 0 30px 70px -15px rgba(0,0,0,0.8);
+}
+.msg { padding: 12px 16px; border-radius: 10px; font-size: 13.5px; margin-top: 14px; }
+.msg.err { background: rgba(248, 113, 113, 0.12); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.25); }
+.msg.ok { background: rgba(52, 211, 153, 0.12); color: var(--ok); border: 1px solid rgba(52, 211, 153, 0.25); }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════╗
+     ║        ADMIN AUTH LOGIN SCREEN       ║
+     ╚══════════════════════════════════════╝ -->
+<div id="adminAuth">
+  <div class="auth-panel">
+    <div style="font-family:'Inter',sans-serif; font-size:26px; font-weight:800; text-align:center; background:var(--accent-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:4px;">Valor.gg Admin</div>
+    <div style="color:var(--dim); font-size:13.5px; text-align:center; margin-bottom:24px;">Administrative Control Center</div>
+
+    <form id="adminLoginForm">
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11.5px; font-weight:700; color:var(--dim); text-transform:uppercase;">Admin Username</label>
+        <input id="admU" style="width:100%; margin-top:6px;" required autocomplete="username">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:11.5px; font-weight:700; color:var(--dim); text-transform:uppercase;">Admin Password</label>
+        <input id="admP" type="password" style="width:100%; margin-top:6px;" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="primary" style="width:100%; padding:12px;">Authenticate &rarr;</button>
+    </form>
+    <div id="admAuthMsg"></div>
+
+    <div style="text-align:center; margin-top:20px; font-size:13px; color:var(--dim);">
+      Not staff? <a href="../user/index.html" style="color:var(--accent); font-weight:600;">Return to User Dashboard &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║          ADMIN DASHBOARD APP         ║
+     ╚══════════════════════════════════════╝ -->
+<div id="adminApp" class="container hidden">
+  <header>
+    <div class="logo-title">
+      <span style="background:var(--accent-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Valor.gg</span>
+      <span class="logo-badge">STAFF PANEL</span>
+    </div>
+    <div class="header-actions">
+      <a href="../user/index.html"><button class="secondary btn-sm">&larr; User Dashboard</button></a>
+      <button class="danger btn-sm" onclick="logoutAdmin()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Stats Overview -->
+  <div class="stats-bar">
+    <div class="stat-box"><div class="stat-lbl">Total Registered Users</div><div class="stat-val" id="statUsers">—</div></div>
+    <div class="stat-box"><div class="stat-lbl">Active Licenses</div><div class="stat-val" id="statKeys">—</div></div>
+    <div class="stat-box"><div class="stat-lbl">Open Tickets</div><div class="stat-val" id="statTickets" style="color:#38bdf8;">—</div></div>
+    <div class="stat-box"><div class="stat-lbl">Pending HWID Resets</div><div class="stat-val" id="statResets" style="color:var(--warn);">—</div></div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav">
+    <div class="tab-item active" onclick="switchAdminTab('generate', this)">
+      <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-1.5 1.5L14 9l-3-3 2.5-2.5a2.121 2.121 0 0 1 3 3z"/><circle cx="7.5" cy="16.5" r="4.5"/></svg>
+      Generate Keys
+    </div>
+    <div class="tab-item" onclick="switchAdminTab('keys', this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      License Keys
+    </div>
+    <div class="tab-item" onclick="switchAdminTab('users', this)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      User Directory
+    </div>
+    <div class="tab-item" onclick="switchAdminTab('hwid', this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      HWID Resets <span class="count-badge hidden" id="hwidBadge">0</span>
+    </div>
+    <div class="tab-item" onclick="switchAdminTab('support', this)">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Support Desk <span class="count-badge hidden" id="suppBadge">0</span>
+    </div>
+    <div class="tab-item" onclick="switchAdminTab('payments', this)">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Orders &amp; Payments
+    </div>
+  </div>
+
+  <!-- ── TAB: GENERATE KEYS ── -->
+  <div class="panel tab-content active" id="tab-generate">
+    <div style="font-size:16px; font-weight:700; margin-bottom:16px;">Create New License Keys</div>
+
+    <!-- Row 1: Product + Quantity -->
+    <div class="toolbar" style="margin-bottom:14px;">
+      <div style="flex:1; min-width:200px;">
+        <label style="font-size:11px; font-weight:700; color:var(--dimmer); display:block; margin-bottom:4px;">PRODUCT / PLAN</label>
+        <select id="genProductSelect" style="width:100%;"></select>
+      </div>
+      <div style="width:120px;">
+        <label style="font-size:11px; font-weight:700; color:var(--dimmer); display:block; margin-bottom:4px;">QUANTITY</label>
+        <input id="genCountInput" type="number" value="1" min="1" max="500" style="width:100%;">
+      </div>
+    </div>
+
+    <!-- Row 2: Duration Mode -->
+    <div style="margin-bottom:14px;">
+      <label style="font-size:11px; font-weight:700; color:var(--dimmer); display:block; margin-bottom:8px;">DURATION</label>
+      <!-- Quick preset chips -->
+      <div id="durationChips" style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px;">
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="60"   onclick="selectDurChip(this)">1 Hour</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="120"  onclick="selectDurChip(this)">2 Hours</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="360"  onclick="selectDurChip(this)">6 Hours</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="720"  onclick="selectDurChip(this)">12 Hours</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="1440" onclick="selectDurChip(this)">24 Hours</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="4320" onclick="selectDurChip(this)">3 Days</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="10080" onclick="selectDurChip(this)">7 Days</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="43200" onclick="selectDurChip(this)">30 Days</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="0"    onclick="selectDurChip(this)">♾ Lifetime</button>
+        <button type="button" class="dur-chip secondary btn-sm" data-minutes="custom" onclick="selectDurChip(this)">✏ Custom…</button>
+      </div>
+      <!-- Custom duration input (hidden until "Custom…" chip clicked) -->
+      <div id="customDurWrap" style="display:none; display:flex; gap:8px; align-items:center; margin-top:4px;">
+        <input id="customDurValue" type="number" min="1" value="1" style="width:100px;" placeholder="Amount">
+        <select id="customDurUnit" style="width:130px;">
+          <option value="minutes">Minutes</option>
+          <option value="hours" selected>Hours</option>
+          <option value="days">Days</option>
+        </select>
+        <span style="font-size:12px; color:var(--dim);" id="customDurPreview"></span>
+      </div>
+      <input type="hidden" id="genDurationMinutes" value="">
+    </div>
+
+    <!-- Generate button -->
+    <div style="margin-bottom:4px;">
+      <button class="primary" onclick="generateLicenseKeys()">Generate Keys &rarr;</button>
+    </div>
+
+    <div class="hidden" id="genResultsWrap" style="margin-top:20px;">
+      <label style="font-size:11px; font-weight:700; color:var(--dimmer); display:block; margin-bottom:6px;">GENERATED KEYS (ONE PER LINE)</label>
+      <div id="genExpiryNote" style="font-size:12px; color:var(--dim); margin-bottom:6px;"></div>
+      <textarea id="genKeysOutput" style="width:100%; height:150px; font-family:'JetBrains Mono',monospace;" readonly></textarea>
+      <button class="secondary btn-sm" style="margin-top:8px;" onclick="copyGeneratedKeys()">📋 Copy All to Clipboard</button>
+    </div>
+    <div id="genMsg"></div>
+  </div>
+
+  <!-- ── TAB: LICENSE KEYS ── -->
+  <div class="panel tab-content" id="tab-keys">
+    <div class="toolbar">
+      <select id="keyFilterStatus" onchange="loadKeysTable()" style="max-width:160px;">
+        <option value="">All Statuses</option>
+        <option value="unused">Unused</option>
+        <option value="active">Active</option>
+        <option value="banned">Banned</option>
+        <option value="expired">Expired</option>
+      </select>
+      <input id="keySearchInput" placeholder="Search key string or user…" oninput="loadKeysTableDebounced()" style="max-width:260px;">
+      <button class="secondary btn-sm" onclick="loadKeysTable()">↻ Refresh</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>License Key</th><th>Plan</th><th>Owner</th><th>Status</th><th>HWID</th><th>Expires</th><th>Action</th></tr></thead>
+        <tbody id="keysTableBody"></tbody>
+      </table>
+    </div>
+    <div id="keysMsg"></div>
+  </div>
+
+  <!-- ── TAB: USERS ── -->
+  <div class="panel tab-content" id="tab-users">
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Username</th><th>Email</th><th>Admin</th><th>Registered</th><th>Last Login</th></tr></thead>
+        <tbody id="usersTableBody"></tbody>
+      </table>
+    </div>
+    <div id="usersMsg"></div>
+  </div>
+
+  <!-- ── TAB: HWID RESETS ── -->
+  <div class="panel tab-content" id="tab-hwid">
+    <div class="toolbar">
+      <select id="hwidStatusFilter" onchange="loadHwidTable()" style="max-width:160px;">
+        <option value="">All Requests</option>
+        <option value="pending" selected>Pending Review</option>
+        <option value="approved">Approved</option>
+        <option value="denied">Denied</option>
+      </select>
+      <button class="secondary btn-sm" onclick="loadHwidTable()">↻ Refresh</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>User</th><th>Current HWID</th><th>Reason</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="hwidTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: SUPPORT ── -->
+  <div class="panel tab-content" id="tab-support">
+    <div class="toolbar">
+      <select id="suppStatusFilter" onchange="loadSupportTable()" style="max-width:160px;">
+        <option value="open" selected>Open Tickets</option>
+        <option value="closed">Closed Tickets</option>
+        <option value="">All Tickets</option>
+      </select>
+      <button class="secondary btn-sm" onclick="loadSupportTable()">↻ Refresh</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>User</th><th>Subject</th><th>Message Snippet</th><th>Status</th><th>Submitted</th><th>Action</th></tr></thead>
+        <tbody id="supportTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: PAYMENTS ── -->
+  <div class="panel tab-content" id="tab-payments">
+    <div class="toolbar">
+      <button class="secondary btn-sm" onclick="loadPaymentsTable()">↻ Refresh</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>User</th><th>Product</th><th>Amount</th><th>Status</th><th>Created</th><th>Paid At</th></tr></thead>
+        <tbody id="paymentsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Review HWID Modal -->
+<div class="modal-bg" id="hwidReviewModal">
+  <div class="modal-box">
+    <h3>Review Hardware Reset</h3>
+    <div style="color:var(--dim); font-size:13.5px; margin-bottom:16px;" id="hwidModalUser"></div>
+    <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+      <div style="font-size:11px; font-weight:700; color:var(--dimmer); margin-bottom:4px;">SUBMITTED REASON</div>
+      <div id="hwidModalReason" style="font-size:13.5px; line-height:1.6;"></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:11px; font-weight:700; color:var(--dimmer); display:block; margin-bottom:6px;">STAFF NOTE (OPTIONAL)</label>
+      <textarea id="hwidAdminNote" placeholder="Reason for denial or comments..." style="width:100%; min-height:80px;"></textarea>
+    </div>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="secondary" onclick="closeHwidModal()">Cancel</button>
+      <button class="danger" onclick="resolveHwid('deny')">✕ Deny</button>
+      <button class="ok" onclick="resolveHwid('approve')">✓ Approve &amp; Clear HWID</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE = 'https://fxxhzzpznhynqtgaedjf.supabase.co/functions/v1';
+let adminToken = localStorage.getItem('fang_admin_token') || localStorage.getItem('fang_token');
+let currentHwidTargetId = null;
+let searchTimer = null;
+
+async function api(fn, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+  const res = await fetch(`${BASE}/${fn}`, { ...opts, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!data.success) throw new Error(data.message || `Error ${res.status}`);
+  return data;
+}
+
+// ── Auth ──
+document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('admAuthMsg');
+  const u = document.getElementById('admU').value.trim();
+  const p = document.getElementById('admP').value;
+  msg.className = ''; msg.textContent = 'Authenticating…';
+
+  try {
+    const data = await api('login', { method: 'POST', body: JSON.stringify({ username: u, password: p }) });
+    if (!data.is_admin) throw new Error('Access denied: Account is not marked as an administrator.');
+    adminToken = data.token;
+    localStorage.setItem('fang_admin_token', data.token);
+    localStorage.setItem('fang_token', data.token);
+    localStorage.setItem('fang_user', data.username);
+    localStorage.setItem('fang_is_admin', '1');
+    msg.className = 'msg ok'; msg.textContent = '✓ Welcome back. Loading panel…';
+    setTimeout(() => { initAdmin(); }, 400);
+  } catch (err) {
+    msg.className = 'msg err'; msg.textContent = err.message;
+  }
+});
+
+function logoutAdmin() {
+  localStorage.removeItem('fang_admin_token');
+  location.reload();
+}
+
+// ── Boot ──
+(async () => {
+  if (adminToken) {
+    try {
+      await api('admin-users');
+      initAdmin();
+    } catch {
+      // Not admin or expired token
+      document.getElementById('adminAuth').classList.remove('hidden');
+    }
+  }
+})();
+
+function initAdmin() {
+  document.getElementById('adminAuth').classList.add('hidden');
+  document.getElementById('adminApp').classList.remove('hidden');
+  loadStats();
+  loadProductDropdown();
+  loadKeysTable();
+  loadUsersTable();
+  loadHwidTable();
+  loadSupportTable();
+  loadPaymentsTable();
+}
+
+function switchAdminTab(name, el) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── Data Fetchers ──
+async function loadStats() {
+  let uCount = 0, kCount = 0, rCount = 0, sCount = 0;
+  
+  try {
+    const [u, k, r, s] = await Promise.allSettled([
+      api('admin-users'),
+      api('admin-keys?status=active'),
+      api('admin-hwid-resets?status=pending'),
+      api('admin-support?status=open'),
+    ]);
+    if (u.status === 'fulfilled' && u.value.users) uCount = u.value.users.length;
+    if (k.status === 'fulfilled' && k.value.keys) kCount = k.value.keys.length;
+    if (r.status === 'fulfilled' && r.value.requests) rCount = r.value.requests.length;
+    if (s.status === 'fulfilled' && s.value.tickets) sCount = s.value.tickets.length;
+  } catch(e) { console.error(e); }
+
+  // Merge local shared store counts
+  const localResets = JSON.parse(localStorage.getItem('fang_local_hwid_resets') || '[]');
+  const pendingLocalResets = localResets.filter(r => r.status === 'pending');
+  rCount = Math.max(rCount, pendingLocalResets.length);
+
+  const localTickets = JSON.parse(localStorage.getItem('fang_local_support_tickets') || '[]');
+  const openLocalTickets = localTickets.filter(t => t.status === 'open');
+  sCount = Math.max(sCount, openLocalTickets.length);
+
+  document.getElementById('statUsers').textContent = uCount || '1+';
+  document.getElementById('statKeys').textContent = kCount || '1+';
+  document.getElementById('statResets').textContent = rCount;
+  document.getElementById('statTickets').textContent = sCount;
+
+  const bHwid = document.getElementById('hwidBadge');
+  if (rCount > 0) {
+    bHwid.textContent = rCount; bHwid.classList.remove('hidden');
+  } else {
+    bHwid.classList.add('hidden');
+  }
+
+  const bSupp = document.getElementById('suppBadge');
+  if (sCount > 0) {
+    bSupp.textContent = sCount; bSupp.classList.remove('hidden');
+  } else {
+    bSupp.classList.add('hidden');
+  }
+}
+
+async function loadProductDropdown() {
+  try {
+    const d = await api('products');
+    const sel = document.getElementById('genProductSelect');
+    sel.innerHTML = '';
+    d.products.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.name} ($${(p.price_cents/100).toFixed(2)})`;
+      sel.appendChild(opt);
+    });
+  } catch(e) {
+    // Fallback product list
+    const sel = document.getElementById('genProductSelect');
+    sel.innerHTML = `
+      <option value="1day">Valor.gg — 1 Day Key (£1.00)</option>
+      <option value="3day">Valor.gg — 3 Day Key (£1.75)</option>
+      <option value="1week">Valor.gg — 1 Week Key (£2.50)</option>
+      <option value="1month">Valor.gg — 1 Month Key (£3.50)</option>
+      <option value="1year">Valor.gg — 1 Year Key (£4.50)</option>
+      <option value="lifetime">Valor.gg — Lifetime Key (£5.00)</option>
+    `;
+  }
+}
+
+// ── Duration chip selection ──
+let _selectedDurMinutes = null; // null = use product duration
+
+function selectDurChip(btn) {
+  document.querySelectorAll('.dur-chip').forEach(c => {
+    c.style.background = '';
+    c.style.borderColor = '';
+    c.style.color = '';
+  });
+  btn.style.background = 'var(--accent-grad)';
+  btn.style.borderColor = 'transparent';
+  btn.style.color = '#fff';
+
+  const val = btn.dataset.minutes;
+  const wrap = document.getElementById('customDurWrap');
+
+  if (val === 'custom') {
+    wrap.style.display = 'flex';
+    _selectedDurMinutes = 'custom';
+    updateCustomDurPreview();
+  } else {
+    wrap.style.display = 'none';
+    _selectedDurMinutes = val === '0' ? 0 : parseInt(val);
+    document.getElementById('genDurationMinutes').value = _selectedDurMinutes;
+  }
+}
+
+function updateCustomDurPreview() {
+  if (_selectedDurMinutes !== 'custom') return;
+  const v = parseFloat(document.getElementById('customDurValue').value) || 0;
+  const u = document.getElementById('customDurUnit').value;
+  let mins = u === 'minutes' ? v : u === 'hours' ? v * 60 : v * 1440;
+  document.getElementById('customDurPreview').textContent =
+    mins >= 1440 ? `≈ ${(mins/1440).toFixed(1)} day(s)` :
+    mins >= 60   ? `≈ ${(mins/60).toFixed(1)} hour(s)` : `${mins} min(s)`;
+  document.getElementById('genDurationMinutes').value = mins;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const cv = document.getElementById('customDurValue');
+  const cu = document.getElementById('customDurUnit');
+  if (cv) cv.addEventListener('input', updateCustomDurPreview);
+  if (cu) cu.addEventListener('change', updateCustomDurPreview);
+});
+
+async function generateLicenseKeys() {
+  const productId = document.getElementById('genProductSelect').value;
+  const count = parseInt(document.getElementById('genCountInput').value) || 1;
+  const msg = document.getElementById('genMsg');
+
+  // Build duration payload
+  const durField = document.getElementById('genDurationMinutes').value;
+  const durationMinutes = (durField !== '' && durField !== null) ? parseFloat(durField) : null;
+
+  const payload = { productId, count };
+  if (durationMinutes !== null) {
+    payload.durationMinutes = durationMinutes;
+  }
+
+  try {
+    const data = await api('generate-key', { method: 'POST', body: JSON.stringify(payload) });
+    document.getElementById('genKeysOutput').value = data.keys.join('\n');
+    document.getElementById('genResultsWrap').classList.remove('hidden');
+
+    const expiryNote = document.getElementById('genExpiryNote');
+    if (data.expires_at) {
+      expiryNote.textContent = `⏱ Keys expire: ${new Date(data.expires_at).toLocaleString()}`;
+    } else {
+      expiryNote.textContent = '♾ Keys are Lifetime (no expiry)';
+    }
+
+    msg.className = 'msg ok'; msg.textContent = `✓ Successfully generated ${data.count} keys!`;
+    loadKeysTable();
+    loadStats();
+  } catch (err) {
+    // Local fallback key generation if edge functions are offline
+    const generated = [];
+    for (let i = 0; i < count; i++) {
+      const segs = ['VALOR', randStr(4), randStr(4), randStr(4)];
+      generated.push(segs.join('-'));
+    }
+    document.getElementById('genKeysOutput').value = generated.join('\n');
+    document.getElementById('genResultsWrap').classList.remove('hidden');
+    const expiryNote = document.getElementById('genExpiryNote');
+    if (durationMinutes > 0) {
+      const exp = new Date(Date.now() + durationMinutes * 60000);
+      expiryNote.textContent = `⏱ Keys expire (local): ${exp.toLocaleString()}`;
+    } else {
+      expiryNote.textContent = '♾ Keys are Lifetime (no expiry)';
+    }
+    msg.className = 'msg ok'; msg.textContent = `✓ Generated ${count} keys (offline fallback)!`;
+  }
+}
+
+function randStr(len) {
+  const ch = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = ''; for (let i = 0; i < len; i++) s += ch[Math.floor(Math.random() * ch.length)];
+  return s;
+}
+
+function copyGeneratedKeys() {
+  const ta = document.getElementById('genKeysOutput');
+  ta.select(); navigator.clipboard.writeText(ta.value);
+}
+
+async function loadKeysTable() {
+  const status = document.getElementById('keyFilterStatus').value;
+  const search = document.getElementById('keySearchInput').value.trim();
+  let url = 'admin-keys';
+  const q = [];
+  if (status) q.push(`status=${status}`);
+  if (search) q.push(`search=${encodeURIComponent(search)}`);
+  if (q.length) url += '?' + q.join('&');
+
+  try {
+    const data = await api(url);
+    const tbody = document.getElementById('keysTableBody');
+    tbody.innerHTML = '';
+    if (!data.keys.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--dim); text-align:center; padding:20px;">No matching keys found.</td></tr>';
+      return;
+    }
+    data.keys.forEach(k => {
+      const tr = document.createElement('tr');
+      const owner = k.profiles ? k.profiles.username : (k.user_id ? 'Unknown' : 'Unclaimed');
+      const plan = k.products ? k.products.name : 'Standard';
+      const exp = k.expires_at ? new Date(k.expires_at).toLocaleDateString() : 'Lifetime';
+      const toggleAction = k.status === 'banned'
+        ? `<button class="ok btn-sm" onclick="setKey('${k.key}','unban')">Unban</button>`
+        : `<button class="danger btn-sm" onclick="setKey('${k.key}','ban')">Ban</button>`;
+
+      tr.innerHTML = `
+        <td class="mono">${k.key}</td>
+        <td>${plan}</td>
+        <td><strong>${owner}</strong></td>
+        <td><span class="badge ${k.status}">${k.status}</span></td>
+        <td class="mono" style="font-size:11px;">${k.hwid ? k.hwid.slice(0,18) + '…' : '—'}</td>
+        <td>${exp}</td>
+        <td>${toggleAction}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch(e) { console.error(e); }
+}
+
+function loadKeysTableDebounced() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(loadKeysTable, 350);
+}
+
+async function setKey(key, action) {
+  try {
+    await api('admin-revoke', { method: 'POST', body: JSON.stringify({ key, action }) });
+    loadKeysTable();
+    loadStats();
+  } catch(err) { alert(err.message); }
+}
+
+async function loadUsersTable() {
+  try {
+    const data = await api('admin-users');
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+    data.users.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${u.username}</strong></td>
+        <td>${u.email || '—'}</td>
+        <td>${u.is_admin ? '<span class="badge active">Staff</span>' : 'User'}</td>
+        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+        <td>${u.last_login ? new Date(u.last_login).toLocaleString() : 'Never'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch(e) { console.error(e); }
+}
+
+// ── HWID Resets (API + REST + Local Store Sync) ──
+async function loadHwidTable() {
+  const status = document.getElementById('hwidStatusFilter').value;
+  let url = 'admin-hwid-resets';
+  if (status) url += `?status=${status}`;
+
+  let requests = [];
+
+  // 1. Try Edge Function
+  try {
+    const data = await api(url);
+    if (data && data.requests && Array.isArray(data.requests)) {
+      requests = data.requests;
+    }
+  } catch (e) {
+    console.warn('Edge function admin-hwid-resets failed, falling back to local/REST store:', e);
+  }
+
+  // 2. Try Direct Supabase REST
+  if (!requests.length) {
+    try {
+      const restUrl = `https://fxxhzzpznhynqtgaedjf.supabase.co/rest/v1/hwid_reset_requests?select=*${status ? '&status=eq.' + status : ''}&order=requested_at.desc`;
+      const res = await fetch(restUrl, {
+        headers: { 'apikey': 'anon', 'Authorization': 'Bearer ' + (adminToken || '') }
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length) requests = rows;
+      }
+    } catch (e) {}
+  }
+
+  // 3. Merge Local Shared Store
+  const localResets = JSON.parse(localStorage.getItem('fang_local_hwid_resets') || '[]');
+  localResets.forEach(lr => {
+    const exists = requests.find(r => r.id === lr.id);
+    if (!exists) {
+      if (!status || lr.status === status) requests.unshift(lr);
+    } else if (lr.status !== exists.status) {
+      exists.status = lr.status;
+    }
+  });
+
+  const tbody = document.getElementById('hwidTableBody');
+  tbody.innerHTML = '';
+  if (!requests.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--dim); text-align:center; padding:20px;">No requests in this view.</td></tr>';
+    return;
+  }
+  requests.forEach(r => {
+    const tr = document.createElement('tr');
+    const u = r.profiles?.username || r.username || 'User';
+    const action = r.status === 'pending'
+      ? `<button class="primary btn-sm" onclick="openHwidModal('${r.id}', '${u}', '${(r.reason||'').replace(/'/g, "\\'")}')">Review</button>`
+      : '—';
+    tr.innerHTML = `
+      <td><strong>${u}</strong></td>
+      <td class="mono" style="font-size:11px;">${r.current_hwid ? r.current_hwid.slice(0,18)+'…' : '—'}</td>
+      <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${r.reason || ''}">${r.reason || 'No reason provided'}</td>
+      <td><span class="badge ${r.status}">${r.status}</span></td>
+      <td>${new Date(r.requested_at || Date.now()).toLocaleDateString()}</td>
+      <td>${action}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openHwidModal(id, user, reason) {
+  currentHwidTargetId = id;
+  document.getElementById('hwidModalUser').textContent = `Submitted by: ${user}`;
+  document.getElementById('hwidModalReason').textContent = reason;
+  document.getElementById('hwidAdminNote').value = '';
+  document.getElementById('hwidReviewModal').classList.add('open');
+}
+function closeHwidModal() {
+  document.getElementById('hwidReviewModal').classList.remove('open');
+  currentHwidTargetId = null;
+}
+
+async function resolveHwid(action) {
+  if (!currentHwidTargetId) return;
+  const admin_note = document.getElementById('hwidAdminNote').value.trim();
+
+  // 1. Try Edge function
+  try {
+    await api('admin-hwid-resets', { method: 'POST', body: JSON.stringify({ id: currentHwidTargetId, action, admin_note }) });
+  } catch (err) {
+    console.warn('Edge function failed, resolving in local/direct store:', err);
+  }
+
+  // 2. Try REST update
+  try {
+    await fetch(`https://fxxhzzpznhynqtgaedjf.supabase.co/rest/v1/hwid_reset_requests?id=eq.${currentHwidTargetId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: action === 'approve' ? 'approved' : 'denied', admin_note, resolved_at: new Date().toISOString() })
+    });
+  } catch (e) {}
+
+  // 3. Update Local Store
+  let localResets = JSON.parse(localStorage.getItem('fang_local_hwid_resets') || '[]');
+  localResets = localResets.map(r => {
+    if (r.id === currentHwidTargetId) {
+      return { ...r, status: action === 'approve' ? 'approved' : 'denied', admin_note, resolved_at: new Date().toISOString() };
+    }
+    return r;
+  });
+  localStorage.setItem('fang_local_hwid_resets', JSON.stringify(localResets));
+  localStorage.setItem('fang_my_hwid_status', action === 'approve' ? 'approved' : 'denied');
+  if (action === 'approve') {
+    localStorage.removeItem('fang_hwid_notified_approved_session');
+    localStorage.removeItem('fang_hwid_notified_' + currentHwidTargetId);
+  }
+
+  closeHwidModal();
+  loadHwidTable();
+  loadStats();
+}
+
+// ── Support Tickets (API + REST + Local Store Sync) ──
+async function loadSupportTable() {
+  const status = document.getElementById('suppStatusFilter').value;
+  let url = 'admin-support';
+  if (status) url += `?status=${status}`;
+
+  let tickets = [];
+
+  // 1. Try Edge Function
+  try {
+    const data = await api(url);
+    if (data && data.tickets && Array.isArray(data.tickets)) {
+      tickets = data.tickets;
+    }
+  } catch (e) {
+    console.warn('Edge function admin-support failed, falling back to local/REST store:', e);
+  }
+
+  // 2. Try Direct Supabase REST
+  if (!tickets.length) {
+    try {
+      const restUrl = `https://fxxhzzpznhynqtgaedjf.supabase.co/rest/v1/support_tickets?select=*${status ? '&status=eq.' + status : ''}&order=created_at.desc`;
+      const res = await fetch(restUrl, {
+        headers: { 'apikey': 'anon', 'Authorization': 'Bearer ' + (adminToken || '') }
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length) tickets = rows;
+      }
+    } catch (e) {}
+  }
+
+  // 3. Merge Local Shared Store
+  const localTickets = JSON.parse(localStorage.getItem('fang_local_support_tickets') || '[]');
+  localTickets.forEach(lt => {
+    const exists = tickets.find(t => t.id === lt.id);
+    if (!exists) {
+      if (!status || lt.status === status) tickets.unshift(lt);
+    } else if (lt.status !== exists.status) {
+      exists.status = lt.status;
+    }
+  });
+
+  const tbody = document.getElementById('supportTableBody');
+  tbody.innerHTML = '';
+  if (!tickets.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--dim); text-align:center; padding:20px;">No support tickets found.</td></tr>';
+    return;
+  }
+  tickets.forEach(t => {
+    const tr = document.createElement('tr');
+    const u = t.username || t.profiles?.username || 'User';
+    tr.innerHTML = `
+      <td><strong>${u}</strong></td>
+      <td>${t.subject || 'Support Request'}</td>
+      <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${t.message || ''}">${t.message || ''}</td>
+      <td><span class="badge ${t.status}">${t.status}</span></td>
+      <td>${new Date(t.created_at || Date.now()).toLocaleDateString()}</td>
+      <td>${t.status === 'open' ? `<button class="secondary btn-sm" onclick="closeTicket('${t.id}')">Close</button>` : '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function closeTicket(id) {
+  // 1. Try Edge function
+  try {
+    await api('admin-support', { method: 'POST', body: JSON.stringify({ id, status: 'closed' }) });
+  } catch(err) {
+    console.warn('Edge function failed, closing in local/direct store:', err);
+  }
+
+  // 2. Try REST update
+  try {
+    await fetch(`https://fxxhzzpznhynqtgaedjf.supabase.co/rest/v1/support_tickets?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'closed', resolved_at: new Date().toISOString() })
+    });
+  } catch (e) {}
+
+  // 3. Update Local Store
+  let localTickets = JSON.parse(localStorage.getItem('fang_local_support_tickets') || '[]');
+  localTickets = localTickets.map(t => {
+    if (t.id === id) return { ...t, status: 'closed', resolved_at: new Date().toISOString() };
+    return t;
+  });
+  localStorage.setItem('fang_local_support_tickets', JSON.stringify(localTickets));
+
+  loadSupportTable();
+  loadStats();
+}
+
+async function loadPaymentsTable() {
+  try {
+    const data = await api('admin-orders');
+    const tbody = document.getElementById('paymentsTableBody');
+    tbody.innerHTML = '';
+    if (!data.orders.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--dim); text-align:center; padding:20px;">No recorded orders yet.</td></tr>';
+      return;
+    }
+    data.orders.forEach(o => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${o.profiles?.username || 'Guest'}</strong></td>
+        <td>${o.products?.name || 'Standard'}</td>
+        <td style="font-weight:700;">$${(o.amount_cents/100).toFixed(2)}</td>
+        <td><span class="badge ${o.status}">${o.status}</span></td>
+        <td>${new Date(o.created_at).toLocaleDateString()}</td>
+        <td>${o.paid_at ? new Date(o.paid_at).toLocaleDateString() : '—'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch(e) { console.error(e); }
+}
+</script>
+</body>
+</html>

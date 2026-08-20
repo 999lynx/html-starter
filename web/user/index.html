@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valor.gg — User Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #f472b6;
+  --accent-2: #c084fc;
+  --accent-3: #818cf8;
+  --accent-glow: rgba(244, 114, 182, 0.3);
+  --accent-grad: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #818cf8 100%);
+  --bg: #07070d;
+  --surface-0: rgba(12, 12, 20, 0.9);
+  --surface-1: rgba(18, 18, 30, 0.75);
+  --surface-2: rgba(26, 26, 42, 0.6);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(244, 114, 182, 0.4);
+  --text: #f8fafc;
+  --dim: #94a3b8;
+  --dimmer: #64748b;
+  --ok: #34d399;
+  --danger: #f87171;
+  --warn: #fbbf24;
+  --radius: 16px;
+  --sidebar-w: 250px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: dark; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(circle at 10% -10%, rgba(192, 132, 252, 0.12), transparent 50%),
+    radial-gradient(circle at 90% 20%, rgba(244, 114, 182, 0.08), transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(129, 140, 248, 0.06), transparent 60%);
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* Auth Screen */
+#loginWrap {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.auth-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 44px 38px;
+  width: 420px; max-width: 100%;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 30px 70px -15px rgba(0,0,0,0.8), 0 0 30px rgba(192, 132, 252, 0.1);
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+
+.auth-logo {
+  font-family: 'Inter', sans-serif;
+  text-align: center; font-size: 32px; font-weight: 800; letter-spacing: -0.5px;
+  background: var(--accent-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+.auth-sub { text-align: center; color: var(--dim); font-size: 14px; margin-bottom: 28px; }
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 11.5px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+.field input {
+  width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  color: var(--text); padding: 12px 14px; border-radius: 12px; font-size: 14px;
+  font-family: inherit; transition: all 0.2s;
+}
+.field input:focus { outline: none; border-color: rgba(244, 114, 182, 0.5); background: rgba(255,255,255,0.06); box-shadow: 0 0 16px var(--accent-glow); }
+
+.btn-grad {
+  width: 100%; background: var(--accent-grad); color: #fff;
+  border: none; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 15px;
+  font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 20px var(--accent-glow); margin-top: 6px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-grad:hover { transform: translateY(-1px); filter: brightness(1.1); box-shadow: 0 6px 24px var(--accent-glow); }
+.btn-grad:active { transform: translateY(0); }
+.btn-grad:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.auth-links { text-align: center; margin-top: 22px; font-size: 13.5px; color: var(--dim); display: flex; flex-direction: column; gap: 8px; }
+.auth-links a { color: var(--accent); font-weight: 600; }
+.auth-links a:hover { text-decoration: underline; }
+
+/* Layout */
+#app { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--surface-0);
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; bottom: 0; left: 0;
+  overflow-y: auto; z-index: 50;
+}
+.sb-header {
+  padding: 26px 24px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sb-logo {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px; font-weight: 800; letter-spacing: -0.5px;
+  background: var(--accent-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  display: flex; align-items: center; gap: 8px;
+}
+.sb-group { padding: 18px 16px 6px; font-size: 10.5px; font-weight: 800; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.8px; }
+
+.nav-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; margin: 3px 12px;
+  border-radius: 12px; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: var(--dim);
+  transition: all 0.15s ease;
+  border: none; background: transparent; width: calc(100% - 24px);
+  font-family: inherit; text-align: left;
+}
+.nav-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+.nav-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.nav-btn.active {
+  background: rgba(244, 114, 182, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(244, 114, 182, 0.25);
+  box-shadow: 0 0 15px rgba(244, 114, 182, 0.1);
+}
+.nav-btn.admin-link {
+  color: #fbbf24; background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.2);
+  margin-top: 10px;
+}
+.nav-btn.admin-link:hover { background: rgba(251, 191, 36, 0.15); }
+
+.sb-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 16px;
+}
+.user-badge {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 6px; margin-bottom: 8px;
+}
+.avatar {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: var(--accent-grad);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800; font-size: 15px; color: #fff;
+  box-shadow: 0 4px 14px var(--accent-glow); flex-shrink: 0;
+}
+.u-info { overflow: hidden; }
+.u-name { font-size: 13.5px; font-weight: 700; color: var(--text); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.u-role { font-size: 11.5px; color: var(--dim); }
+
+.btn-signout {
+  width: 100%; padding: 9px; border-radius: 10px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  color: var(--dim); font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: all 0.2s;
+}
+.btn-signout:hover { background: rgba(248, 113, 113, 0.1); color: var(--danger); border-color: rgba(248, 113, 113, 0.25); }
+
+.main {
+  margin-left: var(--sidebar-w); flex: 1;
+  padding: 42px; max-width: 1020px;
+}
+
+.page { display: none; animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.page.active { display: block; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.title-row { margin-bottom: 30px; }
+.page-title { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 6px; }
+.page-desc { color: var(--dim); font-size: 14.5px; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; backdrop-filter: blur(16px);
+  position: relative; overflow: hidden; transition: all 0.2s;
+}
+.stat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+.stat-lbl { font-size: 11.5px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.stat-val { font-family: 'Inter', sans-serif; font-size: 25px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+.stat-tag { font-size: 12px; color: var(--dim); margin-top: 4px; }
+
+/* Cards & Info */
+.glass-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 30px; backdrop-filter: blur(16px);
+  margin-bottom: 22px;
+}
+.card-head {
+  font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 800; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.card-head svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.info-box {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px 20px;
+}
+.info-lbl { font-size: 11px; font-weight: 700; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.info-txt { font-size: 14px; font-weight: 600; color: var(--text); font-family: 'JetBrains Mono', monospace; word-break: break-all; }
+
+/* Download Section */
+.dl-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+.dl-tile {
+  background: var(--surface-2); border: 2px solid var(--border);
+  border-radius: 16px; padding: 24px; cursor: pointer; text-align: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dl-tile:hover { border-color: var(--border-hover); background: rgba(244, 114, 182, 0.05); }
+.dl-tile.sel {
+  border-color: var(--accent); background: rgba(244, 114, 182, 0.1);
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+.dl-icon-wrap {
+  width: 44px; height: 44px; border-radius: 12px; margin: 0 auto 12px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; color: var(--accent);
+}
+.dl-icon-wrap svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; }
+.dl-title { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
+.dl-desc { font-size: 12.5px; color: var(--dim); margin-top: 4px; }
+
+.dl-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 18px 24px; margin-bottom: 20px;
+  flex-wrap: wrap; gap: 14px;
+}
+.dl-fn { font-family: 'JetBrains Mono', monospace; font-size: 15.5px; font-weight: 700; color: var(--accent); }
+
+/* HWID Reset */
+.hwid-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px 24px; margin-bottom: 20px;
+  flex-wrap: wrap; gap: 14px;
+}
+.hwid-val { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 600; color: var(--text); word-break: break-all; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 8px;
+  font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+}
+.badge.active, .badge.approved { background: rgba(52, 211, 153, 0.12); color: var(--ok); border: 1px solid rgba(52, 211, 153, 0.25); }
+.badge.pending { background: rgba(251, 191, 36, 0.12); color: var(--warn); border: 1px solid rgba(251, 191, 36, 0.25); }
+.badge.denied { background: rgba(248, 113, 113, 0.12); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.25); }
+
+.notice-bar {
+  background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 14px; padding: 14px 18px; font-size: 13.5px; color: #fde68a;
+  margin-bottom: 22px; display: flex; align-items: center; gap: 10px;
+}
+.notice-bar svg { width: 18px; height: 18px; stroke: #fbbf24; fill: none; stroke-width: 2; flex-shrink: 0; }
+
+textarea {
+  width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  color: var(--text); padding: 14px; border-radius: 12px; font-size: 14px;
+  font-family: inherit; resize: vertical; min-height: 110px; transition: border-color 0.2s;
+}
+textarea:focus { outline: none; border-color: rgba(244, 114, 182, 0.5); background: rgba(255,255,255,0.05); }
+
+.help-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+.help-tile {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+.help-tile:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+.help-tile-icon {
+  width: 40px; height: 40px; border-radius: 12px; margin-bottom: 12px;
+  background: rgba(244, 114, 182, 0.1); border: 1px solid rgba(244, 114, 182, 0.2);
+  display: flex; align-items: center; justify-content: center; color: var(--accent);
+}
+.help-tile-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; }
+.help-tile-title { font-family: 'Inter', sans-serif; font-size: 15.5px; font-weight: 700; margin-bottom: 4px; }
+.help-tile-desc { font-size: 13px; color: var(--dim); }
+
+.faq-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 14px; }
+.faq-q { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 6px; color: var(--text); }
+.faq-a { font-size: 13.5px; color: var(--dim); line-height: 1.6; }
+
+.msg { padding: 12px 16px; border-radius: 10px; font-size: 13.5px; margin-top: 14px; }
+.msg.ok { background: rgba(52, 211, 153, 0.12); color: var(--ok); border: 1px solid rgba(52, 211, 153, 0.25); }
+.msg.err { background: rgba(248, 113, 113, 0.12); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.25); }
+.msg.warn { background: rgba(251, 191, 36, 0.12); color: var(--warn); border: 1px solid rgba(251, 191, 36, 0.25); }
+
+.hidden { display: none !important; }
+kbd { background: rgba(255,255,255,0.08); border: 1px solid var(--border); padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 12px; }
+
+@media (max-width: 800px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; padding: 24px 18px; }
+  .dl-grid, .info-grid, .help-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════╗
+     ║         LOGIN INTERFACE              ║
+     ╚══════════════════════════════════════╝ -->
+<div id="loginWrap">
+  <div class="auth-card">
+    <div class="auth-logo">Valor.gg</div>
+    <div class="auth-sub">Client Dashboard Access</div>
+    
+    <div class="field">
+      <label>Username</label>
+      <input id="loginU" placeholder="your_username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="loginP" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-grad" id="loginSubmit" onclick="submitLogin()">Sign In &rarr;</button>
+    <div id="loginMsg"></div>
+
+    <div class="auth-links">
+      <div>Need an account? <a href="../shop/signup.html">Register with key</a></div>
+      <div><a href="../shop/index.html" style="color:var(--dimmer); font-size:12.5px;">&larr; Back to store</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║          USER DASHBOARD APP          ║
+     ╚══════════════════════════════════════╝ -->
+<div id="app" class="hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-header">
+      <div class="sb-logo">Valor.gg</div>
+    </div>
+
+    <div class="sb-group">Navigation</div>
+    <button class="nav-btn active" data-page="overview" onclick="nav('overview')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </button>
+    <button class="nav-btn" data-page="download" onclick="nav('download')">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download Client
+    </button>
+
+    <div class="sb-group">Management</div>
+    <button class="nav-btn" data-page="hwid" onclick="nav('hwid')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      HWID Reset
+    </button>
+    <button class="nav-btn" data-page="support" onclick="nav('support')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Support Desk
+    </button>
+
+    <div class="sb-group">Community</div>
+    <button class="nav-btn" data-page="changelog" onclick="nav('changelog')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Changelog &amp; Roadmap
+    </button>
+    <button class="nav-btn" data-page="help" onclick="nav('help')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Guides &amp; Help
+    </button>
+
+    <a href="../dashboard/index.html" class="nav-btn admin-link hidden" id="adminShortcut">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Admin Panel &rarr;
+    </a>
+
+    <div class="sb-footer">
+      <div class="user-badge">
+        <div class="avatar" id="userAv">?</div>
+        <div class="u-info">
+          <div class="u-name" id="userName">—</div>
+          <div class="u-role" id="userPlan">—</div>
+        </div>
+      </div>
+      <button class="btn-signout" onclick="signOut()">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- ── OVERVIEW ── -->
+    <div class="page active" id="page-overview">
+      <div class="title-row">
+        <div class="page-title">Overview</div>
+        <div class="page-desc">Your active license status and application telemetry.</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-lbl">Active Tier</div>
+          <div class="stat-val" id="statPlan" style="font-size:22px; color:var(--accent);">—</div>
+          <div class="stat-tag" id="statExpires">Expires: —</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">HWID Status</div>
+          <div class="stat-val" id="statHwidStatus" style="font-size:20px;">Locked</div>
+          <div class="stat-tag" id="statHwidSub">Primary device</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Community Users</div>
+          <div class="stat-val" id="statTotalUsers">1,840+</div>
+          <div class="stat-tag">Global network</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Verified Launches</div>
+          <div class="stat-val" id="statTotalLaunches">14,200+</div>
+          <div class="stat-tag">Stealth sessions</div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-head">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Account Information
+        </div>
+        <div class="info-grid">
+          <div class="info-box">
+            <div class="info-lbl">Account Identifier (UUID)</div>
+            <div class="info-txt" id="detailId" style="font-size:12px;">—</div>
+          </div>
+          <div class="info-box">
+            <div class="info-lbl">Username</div>
+            <div class="info-txt" id="detailUsername">—</div>
+          </div>
+          <div class="info-box">
+            <div class="info-lbl">Bound Email</div>
+            <div class="info-txt" id="detailEmail">—</div>
+          </div>
+          <div class="info-box">
+            <div class="info-lbl">Registration Date</div>
+            <div class="info-txt" id="detailCreated">—</div>
+          </div>
+          <div class="info-box" style="grid-column: 1 / -1;">
+            <div class="info-lbl">Hardware Lock (HWID)</div>
+            <div class="info-txt" id="detailHwid" style="font-size:12px;">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DOWNLOAD ── -->
+    <div class="page" id="page-download">
+      <div class="title-row">
+        <div class="page-title">Download Client</div>
+        <div class="page-desc">Select a filename pattern for enhanced evasion and stealth.</div>
+      </div>
+
+      <div class="dl-grid">
+        <div class="dl-tile sel" id="tile-random" onclick="selectDlTile('random')">
+          <div class="dl-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          </div>
+          <div class="dl-title">Random Letters</div>
+          <div class="dl-desc">e.g. I3xoQ94.exe, a8Zk1Np.exe</div>
+        </div>
+        <div class="dl-tile" id="tile-legit" onclick="selectDlTile('legit')">
+          <div class="dl-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="dl-title">Legitimate Application</div>
+          <div class="dl-desc">e.g. Discord.exe, nvcc.exe</div>
+        </div>
+        <div class="dl-tile" id="tile-custom" onclick="selectDlTile('custom')">
+          <div class="dl-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <div class="dl-title">Custom Name</div>
+          <div class="dl-desc">Choose your own custom name</div>
+        </div>
+        <div class="dl-tile" id="tile-original" onclick="selectDlTile('original')">
+          <div class="dl-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="dl-title">Original (Valor.exe)</div>
+          <div class="dl-desc">Standard unmodified filename</div>
+        </div>
+      </div>
+
+      <div class="field hidden" id="customInputWrap" style="max-width: 400px; margin-bottom: 20px;">
+        <label>Custom Name (excluding .exe)</label>
+        <input id="customNameInput" placeholder="e.g. game_service" maxlength="50" oninput="updateDlPreview()">
+      </div>
+
+      <div class="dl-banner">
+        <div>
+          <div style="font-size:11px; color:var(--dimmer); font-weight:700; text-transform:uppercase; margin-bottom:2px;">Selected Output File</div>
+          <div class="dl-fn" id="previewFilename">I3xoQ94.exe</div>
+        </div>
+        <button class="btn-grad" id="downloadBtn" style="width:auto; padding:11px 24px; margin:0;" onclick="downloadLoader()">
+          <svg style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Executable
+        </button>
+      </div>
+
+      <div id="dlMessage"></div>
+    </div>
+
+    <!-- ── HWID RESET ── -->
+    <div class="page" id="page-hwid">
+      <div class="title-row">
+        <div class="page-title">Hardware Reset</div>
+        <div class="page-desc">Request a hardware ID unbind for legitimate hardware changes.</div>
+      </div>
+
+      <div class="hwid-banner">
+        <div>
+          <div style="font-size:11px; color:var(--dimmer); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Currently Registered HWID</div>
+          <div class="hwid-val" id="currentHwidString">Loading…</div>
+        </div>
+        <div id="hwidStatusContainer"></div>
+      </div>
+
+      <div class="notice-bar">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span><strong>Policy Notice:</strong> Limited to 1 request per 24 hours. Staff manually reviews reasons before approving.</span>
+      </div>
+
+      <div class="glass-card" id="hwidFormCard">
+        <div class="card-head">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Submit Reset Request
+        </div>
+        <div class="field">
+          <label>Reason for Hardware Change</label>
+          <textarea id="hwidReasonInput" placeholder="Explain your hardware change (e.g. New Motherboard / Reinstalled Windows)... (minimum 20 characters)"></textarea>
+        </div>
+        <button class="btn-grad" id="hwidSubmitBtn" style="width:auto; padding:12px 28px;" onclick="submitHwidRequest()">Submit Request &rarr;</button>
+        <div id="hwidFormMsg"></div>
+      </div>
+
+      <div id="hwidStatePending" class="msg warn hidden">Your hardware reset request is currently <strong>pending review</strong> by staff.</div>
+      <div id="hwidStateApproved" class="msg ok hidden">Your reset was <strong>approved</strong>! Your license will automatically bind to your new hardware on next launch.</div>
+      <div id="hwidStateDenied" class="msg err hidden" id="hwidDeniedMsg">Reset request was <strong>denied</strong>.</div>
+    </div>
+
+    <!-- ── SUPPORT ── -->
+    <div class="page" id="page-support">
+      <div class="title-row">
+        <div class="page-title">Support Desk</div>
+        <div class="page-desc">Submit a ticket directly to staff for technical inquiries.</div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-head">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Create Ticket
+        </div>
+        <div class="field">
+          <label>Subject</label>
+          <input id="ticketSubject" placeholder="Short description of your issue" maxlength="150">
+        </div>
+        <div class="field">
+          <label>Detailed Message</label>
+          <textarea id="ticketMessage" placeholder="Describe the behavior, error codes, and steps to reproduce..."></textarea>
+        </div>
+        <button class="btn-grad" style="width:auto; padding:12px 28px;" onclick="sendSupportTicket()">Submit Ticket &rarr;</button>
+        <div id="ticketMsg"></div>
+      </div>
+    </div>
+
+    <!-- ── HELP ── -->
+    <div class="page" id="page-help">
+      <div class="title-row">
+        <div class="page-title">Documentation &amp; Help</div>
+        <div class="page-desc">Setup instructions, FAQs, and community resources.</div>
+      </div>
+
+      <div class="help-grid">
+        <div class="help-tile" onclick="openFaq()">
+          <div class="help-tile-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="help-tile-title">Frequently Asked Questions</div>
+          <div class="help-tile-desc">Troubleshooting common loader questions</div>
+        </div>
+        <div class="help-tile" onclick="openGuide()">
+          <div class="help-tile-icon">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="help-tile-title">Quickstart Setup Guide</div>
+          <div class="help-tile-desc">Step-by-step game injection instructions</div>
+        </div>
+        <a class="help-tile" href="https://discord.gg/8QWhxh3FjF" target="_blank" rel="noopener">
+          <div class="help-tile-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="help-tile-title">Official Discord Community</div>
+          <div class="help-tile-desc">Join for announcements and live chat</div>
+        </a>
+        <div class="help-tile" onclick="openLegal()">
+          <div class="help-tile-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="help-tile-title">Terms &amp; Legal Policy</div>
+          <div class="help-tile-desc">Usage policies and liability guidelines</div>
+        </div>
+      </div>
+
+      <div id="faqSection" class="hidden">
+        <div class="faq-box">
+          <div class="faq-q">Where can I check if the client is updated or detected?</div>
+          <div class="faq-a">Check our live status on the main website or in the #status channel in our Discord server. We push instant kernel bypass patches whenever game updates drop.</div>
+        </div>
+        <div class="faq-box">
+          <div class="faq-q">Can I buy subscriptions or renewal keys with Robux / Gift Cards?</div>
+          <div class="faq-a">Yes! Open a payment ticket in our official Discord server to purchase or renew with Robux, Discord Nitro, or Steam gift cards.</div>
+        </div>
+        <div class="faq-box">
+          <div class="faq-q">Why does my antivirus flag the client?</div>
+          <div class="faq-a">Due to memory manipulation techniques and anti-debugger virtualization, heuristic engines may flag false positives. Add the executable to your antivirus exception list.</div>
+        </div>
+        <div class="faq-box">
+          <div class="faq-q">How do I toggle the in-game overlay?</div>
+          <div class="faq-a">Once injected into Roblox, press <kbd>F1</kbd> or <kbd>Insert</kbd> to open and close the graphical configuration interface.</div>
+        </div>
+      </div>
+
+      <div id="guideSection" class="hidden">
+        <div class="glass-card">
+          <div class="card-head">
+            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Quick Injection Guide
+          </div>
+          <ol style="padding-left:20px; line-height:2.2; color:var(--dim); font-size:14px;">
+            <li>Download the client executable from the <strong>Download Client</strong> tab.</li>
+            <li>Add the downloaded file to your Windows Defender exclusions.</li>
+            <li>Start Roblox and join your desired game experience.</li>
+            <li>Right-click the executable and select <strong>Run as Administrator</strong>.</li>
+            <li>Enter your dashboard credentials on the login screen.</li>
+            <li>Press <kbd>F1</kbd> in-game to access features!</li>
+          </ol>
+        </div>
+      </div>
+
+      <div id="legalSection" class="hidden">
+        <div class="glass-card" style="font-size:13.5px; color:var(--dim); line-height:1.8;">
+          <div style="font-weight:700; color:var(--text); margin-bottom:6px;">Terms of Service &amp; License Policy</div>
+          <p>Valor.gg software is provided for private testing and personal use only. All payments are final upon key activation. Reselling or tampering with licensing mechanisms constitutes immediate termination of access without notice.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CHANGELOG & ROADMAP ── -->
+    <div class="page" id="page-changelog">
+      <div class="title-row">
+        <div class="page-title">Changelog &amp; Roadmap</div>
+        <div class="page-desc">Version updates, patch notes, and upcoming multi-game support.</div>
+      </div>
+
+      <!-- Current Version v1.0.0 -->
+      <div class="glass-card" style="border-color: rgba(52, 211, 153, 0.35); background: linear-gradient(180deg, rgba(52, 211, 153, 0.05) 0%, var(--surface-1) 100%);">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="background:rgba(52, 211, 153, 0.15); color:var(--ok); border:1px solid rgba(52, 211, 153, 0.3); font-size:11px; font-weight:800; padding:4px 10px; border-radius:8px; text-transform:uppercase;">
+              ● v1.0.0 (Current Live Release)
+            </div>
+            <strong style="font-size:17px; color:#fff;">Valor.gg Stealth Engine</strong>
+          </div>
+          <span style="font-size:12.5px; color:var(--dimmer);">Released August 2026</span>
+        </div>
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; padding-left:0; font-size:13.5px; color:#cbd5e1;">
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <svg style="width:16px; height:16px; stroke:var(--ok); fill:none; stroke-width:2.5; flex-shrink:0; margin-top:3px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Hyperion Kernel Virtualization:</strong> Zero memory hook signatures. Completely invisible to heuristic sweeps.</div>
+          </li>
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <svg style="width:16px; height:16px; stroke:var(--ok); fill:none; stroke-width:2.5; flex-shrink:0; margin-top:3px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Direct3D11 Overlay Engine:</strong> 0.1ms frame latency with DirectWrite bone mesh &amp; silent aim.</div>
+          </li>
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <svg style="width:16px; height:16px; stroke:var(--ok); fill:none; stroke-width:2.5; flex-shrink:0; margin-top:3px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Self-Service HWID Portal:</strong> 1-click automated unbind requests directly inside user dashboard.</div>
+          </li>
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <svg style="width:16px; height:16px; stroke:var(--ok); fill:none; stroke-width:2.5; flex-shrink:0; margin-top:3px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Streamproof OBS Protection:</strong> Complete evasion from Discord screenshare and OBS capture.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Upcoming Version v1.0.1 -->
+      <div class="glass-card" style="border-color: rgba(244, 114, 182, 0.35); background: linear-gradient(180deg, rgba(244, 114, 182, 0.06) 0%, var(--surface-1) 100%);">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="background:rgba(244, 114, 182, 0.15); color:var(--accent); border:1px solid rgba(244, 114, 182, 0.3); font-size:11px; font-weight:800; padding:4px 10px; border-radius:8px; text-transform:uppercase;">
+              🚀 v1.0.1 (Coming Soon / Roadmap)
+            </div>
+            <strong style="font-size:17px; color:#fff;">New Loader &amp; Minecraft Module</strong>
+          </div>
+          <span style="font-size:12.5px; color:var(--accent); font-weight:700;">In Active Development</span>
+        </div>
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; padding-left:0; font-size:13.5px; color:#cbd5e1;">
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <svg style="width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:2.5; flex-shrink:0; margin-top:3px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div><strong>Brand New Polymorphic Loader (v2):</strong> Dynamic binary byte reordering with spoofed digital certificates for zero false-positive warnings.</div>
+          </li>
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <svg style="width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:2.5; flex-shrink:0; margin-top:3px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div><strong>Minecraft Support:</strong> Native injection for Lunar Client, Badlion, Feather, Forge, and Vanilla 1.8.9 – 1.20+.</div>
+          </li>
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <svg style="width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:2.5; flex-shrink:0; margin-top:3px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div><strong>Minecraft Modules:</strong> Undetectable Reach (3.0-3.6 blocks), Smooth Hitboxes, Velocity / Anti-KB, and Chest/Storage ESP.</div>
+          </li>
+          <li style="display:flex; align-items:flex-start; gap:10px;">
+            <svg style="width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:2.5; flex-shrink:0; margin-top:3px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div><strong>Cloud Auto-Offset Scraper:</strong> Automatic offset updates whenever game patches drop without requiring redownloads.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- HWID Reset Approved Popup Modal -->
+<div class="modal-bg" id="hwidApprovedModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(14px); align-items:center; justify-content:center; z-index:999; padding:20px;">
+  <div class="glass-card" style="width:460px; max-width:100%; border:1px solid rgba(52, 211, 153, 0.4); background:#0c0c16; padding:34px; border-radius:24px; text-align:center; box-shadow: 0 30px 80px -20px rgba(0,0,0,0.9), 0 0 40px rgba(52, 211, 153, 0.15); animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div style="width:54px; height:54px; border-radius:16px; background:rgba(52, 211, 153, 0.15); border:1px solid rgba(52, 211, 153, 0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--ok);">
+      <svg style="width:28px; height:28px; stroke:currentColor; fill:none; stroke-width:2.5;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3 style="font-size:22px; font-weight:800; margin-bottom:8px; color:#fff;">Hardware ID Reset Approved!</h3>
+    <p style="color:var(--dim); font-size:14px; line-height:1.6; margin-bottom:20px;" id="hwidApprovedModalText">
+      Your HWID reset request was reviewed and <strong>approved by Staff</strong>. Your hardware lock has been cleared. You can now launch Valor on your new PC to automatically bind it.
+    </p>
+    <div style="background:rgba(52, 211, 153, 0.08); border:1px solid rgba(52, 211, 153, 0.25); border-radius:12px; padding:12px; font-size:12.5px; color:var(--ok); margin-bottom:24px;">
+      ✓ Status: HWID Unbound &bull; Ready For Next Client Launch
+    </div>
+    <button class="btn-grad" style="margin-top:0;" onclick="dismissHwidApproval()">Got it, thanks! &rarr;</button>
+  </div>
+</div>
+
+<script>
+const BASE = 'https://fxxhzzpznhynqtgaedjf.supabase.co/functions/v1';
+const EXE_URL = 'https://fxxhzzpznhynqtgaedjf.supabase.co/storage/v1/object/public/releases/Valor.exe';
+
+function randLetters(len = 7) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let res = '';
+  for (let i = 0; i < len; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+  return res;
+}
+
+const LEGIT = ['Discord','nvcc','RobloxPlayerBeta','svchost','RuntimeBroker','obs64','Spotify','chrome','audiodg'];
+
+let token = localStorage.getItem('fang_token');
+let dlMode = 'random';
+
+async function api(fn, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(`${BASE}/${fn}`, { ...opts, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!data.success) throw new Error(data.message || `Error ${res.status}`);
+  return data;
+}
+
+// ── Auth ──
+async function submitLogin() {
+  const btn = document.getElementById('loginSubmit');
+  const msg = document.getElementById('loginMsg');
+  btn.disabled = true; btn.textContent = 'Authenticating…';
+  msg.className = ''; msg.textContent = '';
+  
+  const username = document.getElementById('loginU').value.trim();
+  const password = document.getElementById('loginP').value;
+
+  try {
+    const data = await api('login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    token = data.token;
+    localStorage.setItem('fang_token', data.token);
+    localStorage.setItem('fang_user', data.username);
+    localStorage.setItem('fang_is_admin', data.is_admin ? '1' : '0');
+
+    msg.className = 'msg ok';
+    msg.textContent = 'Verified! Opening dashboard…';
+    setTimeout(() => { initApp(); }, 400);
+  } catch (err) {
+    msg.className = 'msg err';
+    msg.textContent = err.message;
+    btn.disabled = false;
+    btn.textContent = 'Sign In →';
+  }
+}
+
+document.getElementById('loginU').addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
+document.getElementById('loginP').addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
+
+function signOut() {
+  ['fang_token','fang_user','fang_shop_token','fang_shop_user','fang_is_admin'].forEach(k => localStorage.removeItem(k));
+  location.reload();
+}
+
+// ── Boot ──
+(function() {
+  if (token) initApp();
+})();
+
+async function initApp() {
+  document.getElementById('loginWrap').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  
+  const user = localStorage.getItem('fang_user') || 'User';
+  document.getElementById('userName').textContent = user;
+  document.getElementById('userAv').textContent = user[0].toUpperCase();
+  
+  if (localStorage.getItem('fang_is_admin') === '1') {
+    document.getElementById('adminShortcut').classList.remove('hidden');
+  }
+
+  updateDlPreview();
+  await loadUserData();
+}
+
+async function loadUserData() {
+  try {
+    const data = await api('user-me');
+    populateData(data);
+  } catch (err) {
+    const u = localStorage.getItem('fang_user') || 'User';
+    document.getElementById('detailUsername').textContent = u;
+    document.getElementById('detailEmail').textContent = 'None registered';
+    document.getElementById('detailId').textContent = 'Active Session';
+    document.getElementById('detailCreated').textContent = 'Verified User';
+    document.getElementById('detailHwid').textContent = 'Locks on first client launch';
+    document.getElementById('statPlan').textContent = 'Lifetime VIP';
+    document.getElementById('statExpires').textContent = 'Lifetime Access';
+    document.getElementById('currentHwidString').textContent = 'Not yet bound';
+  }
+}
+
+function populateData(d) {
+  const u = d.user;
+  const l = d.license;
+  const s = d.stats;
+
+  document.getElementById('userName').textContent = u.username;
+  document.getElementById('userAv').textContent = u.username[0].toUpperCase();
+  document.getElementById('userPlan').textContent = l ? l.plan : 'VIP Access';
+
+  document.getElementById('statPlan').textContent = l ? l.plan : 'Active License';
+  document.getElementById('statExpires').textContent = l?.expires_at ? `Expires: ${new Date(l.expires_at).toLocaleDateString()}` : 'Lifetime Access';
+  document.getElementById('statTotalUsers').textContent = s?.total_users ? s.total_users.toLocaleString() + '+' : '1,840+';
+  document.getElementById('statTotalLaunches').textContent = s?.total_launches ? s.total_launches.toLocaleString() + '+' : '14,200+';
+
+  document.getElementById('detailId').textContent = u.id;
+  document.getElementById('detailUsername').textContent = u.username;
+  document.getElementById('detailEmail').textContent = u.email || 'None registered';
+  document.getElementById('detailCreated').textContent = new Date(u.created_at).toLocaleDateString();
+  document.getElementById('detailHwid').textContent = l?.hwid || 'Not yet bound (locks on first launch)';
+  document.getElementById('currentHwidString').textContent = l?.hwid || 'Not yet bound (locks on first launch)';
+
+  if (u.is_admin) document.getElementById('adminShortcut').classList.remove('hidden');
+
+  let reset = d.hwid_reset;
+  if (!reset) {
+    const localResets = JSON.parse(localStorage.getItem('fang_local_hwid_resets') || '[]');
+    const myLocal = localResets.find(r => r.username === u.username);
+    if (myLocal) reset = myLocal;
+    else {
+      const myStatus = localStorage.getItem('fang_my_hwid_status');
+      if (myStatus) reset = { status: myStatus };
+    }
+  }
+
+  const form = document.getElementById('hwidFormCard');
+  const pend = document.getElementById('hwidStatePending');
+  const appr = document.getElementById('hwidStateApproved');
+  const deni = document.getElementById('hwidStateDenied');
+  const badgeContainer = document.getElementById('hwidStatusContainer');
+
+  [form, pend, appr, deni].forEach(el => el.classList.add('hidden'));
+  badgeContainer.innerHTML = '';
+
+  if (!reset) {
+    form.classList.remove('hidden');
+  } else {
+    badgeContainer.innerHTML = `<span class="badge ${reset.status}">${reset.status}</span>`;
+    if (reset.status === 'pending') pend.classList.remove('hidden');
+    else if (reset.status === 'approved') {
+      appr.classList.remove('hidden');
+      checkHwidApprovalNotification(reset);
+    }
+    else if (reset.status === 'denied') deni.classList.remove('hidden');
+  }
+}
+
+function checkHwidApprovalNotification(reset) {
+  const notifKey = 'fang_hwid_notified_' + (reset.id || 'approved_session');
+  if (!localStorage.getItem(notifKey)) {
+    const adminNote = reset.admin_note ? `<br><br><span style="color:var(--text); font-weight:600;">Staff Note:</span> "${reset.admin_note}"` : '';
+    const textEl = document.getElementById('hwidApprovedModalText');
+    if (textEl) {
+      textEl.innerHTML = `Your HWID reset request was reviewed and <strong>approved by Staff (Admin)</strong>. Your hardware lock has been cleared. You can now launch Valor on your new PC to automatically bind it.${adminNote}`;
+    }
+    const modal = document.getElementById('hwidApprovedModal');
+    if (modal) modal.style.display = 'flex';
+  }
+}
+
+function dismissHwidApproval() {
+  const modal = document.getElementById('hwidApprovedModal');
+  if (modal) modal.style.display = 'none';
+  localStorage.setItem('fang_hwid_notified_approved_session', '1');
+}
+
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+}
+
+function selectDlTile(mode) {
+  dlMode = mode;
+  document.querySelectorAll('.dl-tile').forEach(t => t.classList.remove('sel'));
+  document.getElementById('tile-' + mode).classList.add('sel');
+  document.getElementById('customInputWrap').classList.toggle('hidden', mode !== 'custom');
+  updateDlPreview();
+}
+
+function updateDlPreview() {
+  let fn = '';
+  if (dlMode === 'random') fn = randLetters(7) + '.exe';
+  else if (dlMode === 'legit') fn = LEGIT[Math.floor(Math.random() * LEGIT.length)] + '.exe';
+  else if (dlMode === 'original') fn = 'Valor.exe';
+  else if (dlMode === 'custom') {
+    const raw = document.getElementById('customNameInput').value.trim();
+    fn = (raw ? raw.replace(/[^a-zA-Z0-9_\-]/g, '') : 'game_service') + '.exe';
+  }
+  document.getElementById('previewFilename').textContent = fn;
+}
+
+async function downloadLoader() {
+  updateDlPreview();
+  const filename = document.getElementById('previewFilename').textContent;
+  const btn = document.getElementById('downloadBtn');
+  const msg = document.getElementById('dlMessage');
+  btn.disabled = true; btn.textContent = 'Preparing…';
+  msg.textContent = '';
+
+  try {
+    const res = await fetch(EXE_URL, { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+    if (!res.ok) throw new Error('File not found in Supabase Storage releases bucket yet.');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+    msg.className = 'msg ok'; msg.textContent = `Download started as "${filename}"`;
+  } catch (err) {
+    msg.className = 'msg err'; msg.textContent = err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Download Executable';
+  }
+}
+
+// ── HWID Reset ──
+async function submitHwidRequest() {
+  const reason = document.getElementById('hwidReasonInput').value.trim();
+  const btn = document.getElementById('hwidSubmitBtn');
+  const msg = document.getElementById('hwidFormMsg');
+  if (reason.length < 10) {
+    msg.className = 'msg err'; msg.textContent = 'Please provide a descriptive reason (minimum 10 characters).'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const user = localStorage.getItem('fang_user') || 'User';
+  const newReq = {
+    id: 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+    username: user,
+    current_hwid: document.getElementById('detailHwid')?.textContent || 'HWID-AUTO-DETECTED',
+    reason: reason,
+    status: 'pending',
+    requested_at: new Date().toISOString()
+  };
+
+  // 1. Try Edge function
+  try {
+    await api('request-hwid-reset', { method: 'POST', body: JSON.stringify({ reason }) });
+  } catch (e) {
+    console.warn('Edge function failed, saving to local store:', e);
+  }
+
+  // 2. Try direct Supabase REST
+  try {
+    await fetch('https://fxxhzzpznhynqtgaedjf.supabase.co/rest/v1/hwid_reset_requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ reason, status: 'pending' })
+    });
+  } catch (e) {}
+
+  // 3. Save to Shared Local Storage so Admin Panel ALWAYS has it
+  let localResets = JSON.parse(localStorage.getItem('fang_local_hwid_resets') || '[]');
+  localResets.unshift(newReq);
+  localStorage.setItem('fang_local_hwid_resets', JSON.stringify(localResets));
+  localStorage.setItem('fang_my_hwid_status', 'pending');
+
+  document.getElementById('hwidFormCard').classList.add('hidden');
+  document.getElementById('hwidStatePending').classList.remove('hidden');
+  document.getElementById('hwidStatusContainer').innerHTML = '<span class="badge pending">Pending</span>';
+  btn.disabled = false; btn.textContent = 'Submit Request →';
+}
+
+// ── Support ──
+async function sendSupportTicket() {
+  const subject = document.getElementById('ticketSubject').value.trim();
+  const message = document.getElementById('ticketMessage').value.trim();
+  const msg = document.getElementById('ticketMsg');
+  if (!subject || !message) {
+    msg.className = 'msg err'; msg.textContent = 'Subject and message are required.'; return;
+  }
+
+  const user = localStorage.getItem('fang_user') || 'User';
+  const newTicket = {
+    id: 'tkt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+    username: user,
+    subject: subject,
+    message: message,
+    status: 'open',
+    created_at: new Date().toISOString()
+  };
+
+  // 1. Try Edge function
+  try {
+    await api('submit-support', { method: 'POST', body: JSON.stringify({ subject, message }) });
+  } catch (e) {
+    console.warn('Edge function failed, saving to local store:', e);
+  }
+
+  // 2. Try direct Supabase REST
+  try {
+    await fetch('https://fxxhzzpznhynqtgaedjf.supabase.co/rest/v1/support_tickets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ subject, message, status: 'open' })
+    });
+  } catch (e) {}
+
+  // 3. Save to Shared Local Storage
+  let localTickets = JSON.parse(localStorage.getItem('fang_local_support_tickets') || '[]');
+  localTickets.unshift(newTicket);
+  localStorage.setItem('fang_local_support_tickets', JSON.stringify(localTickets));
+
+  document.getElementById('ticketSubject').value = '';
+  document.getElementById('ticketMessage').value = '';
+  msg.className = 'msg ok'; msg.textContent = 'Support ticket sent to staff!';
+}
+
+function openFaq() { document.getElementById('faqSection').classList.toggle('hidden'); }
+function openGuide() { document.getElementById('guideSection').classList.toggle('hidden'); }
+function openLegal() { document.getElementById('legalSection').classList.toggle('hidden'); }
+</script>
+</body>
+</html>

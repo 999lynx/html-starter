@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Valor.gg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #f472b6;
+    --accent-glow: rgba(244, 114, 182, 0.3);
+    --accent-grad: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #818cf8 100%);
+    --bg: #07070d;
+    --s1: rgba(18, 18, 30, 0.75);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-focus: rgba(244, 114, 182, 0.5);
+    --text: #f8fafc;
+    --dim: #94a3b8;
+    --danger: #f87171;
+    --ok: #34d399;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background-image: 
+      radial-gradient(circle at 50% 20%, rgba(192, 132, 252, 0.15), transparent 50%),
+      radial-gradient(circle at 10% 80%, rgba(244, 114, 182, 0.08), transparent 40%);
+  }
+
+  .card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: 24px; padding: 42px 36px; width: 400px; max-width: 100%;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 25px 60px -15px rgba(0,0,0,0.8), 0 0 30px rgba(192, 132, 252, 0.08);
+    animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .logo {
+    font-family: 'Inter', sans-serif;
+    text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -0.5px;
+    background: var(--accent-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .sub { text-align: center; color: var(--dim); font-size: 14px; margin-bottom: 28px; }
+
+  .field { margin-bottom: 18px; }
+  label { display: block; font-size: 12px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  input {
+    width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 14px; border-radius: 12px; font-size: 14px;
+    font-family: inherit; transition: all 0.2s;
+  }
+  input:focus { outline: none; border-color: var(--border-focus); background: rgba(255,255,255,0.06); box-shadow: 0 0 16px rgba(232, 121, 249, 0.15); }
+
+  button {
+    width: 100%; margin-top: 10px; background: var(--accent-grad); color: #fff;
+    border: none; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 15px;
+    font-family: inherit; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+  button:hover { transform: translateY(-1px); filter: brightness(1.1); box-shadow: 0 6px 24px var(--accent-glow); }
+  button:active { transform: translateY(0); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .msg { padding: 12px 16px; border-radius: 10px; font-size: 13.5px; margin-top: 16px; line-height: 1.4; }
+  .msg.err { background: rgba(248, 113, 113, 0.12); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.25); }
+  .msg.ok { background: rgba(52, 211, 153, 0.12); color: var(--ok); border: 1px solid rgba(52, 211, 153, 0.25); }
+
+  .links { text-align: center; margin-top: 22px; font-size: 13.5px; color: var(--dim); display: flex; flex-direction: column; gap: 10px; }
+  .links a { color: var(--accent); text-decoration: none; font-weight: 600; transition: color 0.15s; }
+  .links a:hover { text-decoration: underline; }
+  .links .back { color: var(--dim); font-size: 13px; }
+  .links .back:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">Valor.gg</div>
+  <div class="sub">Welcome back! Sign in to continue.</div>
+  
+  <form id="loginForm">
+    <div class="field">
+      <label>Username</label>
+      <input id="loginUser" autocomplete="username" placeholder="your_username" required>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" required>
+    </div>
+    <button type="submit" id="submitBtn">Sign In &rarr;</button>
+  </form>
+
+  <div id="msg"></div>
+
+  <div class="links">
+    <div>Don't have an account? <a href="signup.html">Register with a key</a></div>
+    <a href="index.html" class="back">&larr; Back to shop</a>
+  </div>
+</div>
+
+<script>
+const FUNCTION_BASE = 'https://fxxhzzpznhynqtgaedjf.supabase.co/functions/v1';
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const box = document.getElementById('msg');
+  const btn = document.getElementById('submitBtn');
+  box.className = ''; box.textContent = '';
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  try {
+    const res = await fetch(`${FUNCTION_BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('loginUser').value.trim(),
+        password: document.getElementById('loginPass').value,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!data.success) throw new Error(data.message || 'Invalid username or password.');
+    
+    // Store credentials across unified keys
+    localStorage.setItem('fang_token', data.token);
+    localStorage.setItem('fang_user', data.username);
+    localStorage.setItem('fang_shop_token', data.token);
+    localStorage.setItem('fang_shop_user', data.username);
+    localStorage.setItem('fang_is_admin', data.is_admin ? '1' : '0');
+
+    box.className = 'msg ok';
+    box.textContent = data.is_admin ? '✦ Admin account detected. Opening dashboard…' : '✦ Signed in! Taking you to your dashboard…';
+
+    setTimeout(() => {
+      // Both admins and regular users have access to user dashboard! Admins can access admin panel from within.
+      location.href = '../user/index.html';
+    }, 600);
+  } catch (err) {
+    box.className = 'msg err';
+    box.textContent = err.message;
+    btn.disabled = false;
+    btn.textContent = 'Sign In →';
+  }
+});
+</script>
+</body>
+</html>

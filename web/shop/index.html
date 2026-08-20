@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valor.gg — Premium Roblox Stealth Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #f472b6;
+    --accent-2: #c084fc;
+    --accent-3: #818cf8;
+    --accent-glow: rgba(244, 114, 182, 0.3);
+    --accent-grad: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #818cf8 100%);
+    --bg: #07070d;
+    --s0: rgba(12, 12, 20, 0.88);
+    --s1: rgba(18, 18, 30, 0.75);
+    --s2: rgba(26, 26, 42, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(244, 114, 182, 0.4);
+    --text: #f8fafc;
+    --dim: #94a3b8;
+    --dimmer: #64748b;
+    --ok: #34d399;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --star: #fbbf24;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; color-scheme: dark; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.5;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(192, 132, 252, 0.12), transparent 45%),
+      radial-gradient(circle at 10% 40%, rgba(244, 114, 182, 0.07), transparent 40%),
+      radial-gradient(circle at 90% 70%, rgba(129, 140, 248, 0.06), transparent 50%);
+  }
+
+  #canvas-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    opacity: 0.8;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ── Header ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 26px; margin-top: 16px;
+    background: var(--s0); border: 1px solid var(--border);
+    border-radius: 20px; backdrop-filter: blur(24px);
+    position: sticky; top: 16px; z-index: 100;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  header.scrolled {
+    box-shadow: 0 15px 35px -10px rgba(0,0,0,0.8), 0 0 30px rgba(192, 132, 252, 0.1);
+    border-color: rgba(255,255,255,0.12);
+  }
+  .logo {
+    font-weight: 800; font-size: 23px; letter-spacing: -0.5px;
+    background: var(--accent-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+  }
+  .logo-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--accent-grad);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+  .logo-mark svg { width: 18px; height: 18px; fill: #fff; }
+
+  .nav-links { display: flex; align-items: center; gap: 24px; }
+  .nav-links a {
+    font-size: 14px; font-weight: 600; color: var(--dim);
+    text-decoration: none; transition: color 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  .nav-btns { display: flex; align-items: center; gap: 12px; }
+
+  /* ── Buttons ── */
+  button {
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+    padding: 10px 22px; border-radius: 12px; border: none;
+    cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none;
+  }
+  button.primary {
+    background: var(--accent-grad); color: #fff;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+  button.primary:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 8px 28px var(--accent-glow); }
+  button.primary:active { transform: translateY(0); }
+  button.secondary {
+    background: var(--s2); color: var(--text); border: 1px solid var(--border);
+  }
+  button.secondary:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+  button.ghost { background: transparent; color: var(--dim); }
+  button.ghost:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+  /* ── Migration Notice Banner ── */
+  .migration-banner {
+    margin-top: 24px; padding: 14px 20px; border-radius: 14px;
+    background: rgba(244, 114, 182, 0.08); border: 1px solid rgba(244, 114, 182, 0.25);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    font-size: 13.5px;
+  }
+  .mb-left { display: flex; align-items: center; gap: 10px; }
+  .mb-left svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; stroke-width: 2; flex-shrink: 0; }
+  .mb-badge {
+    background: rgba(244, 114, 182, 0.2); color: var(--accent);
+    padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 11px; text-transform: uppercase;
+  }
+
+  /* ── Hero ── */
+  .hero { text-align: center; padding: 50px 0 30px; position: relative; }
+  
+  /* Fixed Operational Pill Alignment */
+  .status-pill {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 7px 18px; border-radius: 100px;
+    background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25);
+    font-size: 12px; font-weight: 700; color: #34d399; text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 22px; backdrop-filter: blur(10px); vertical-align: middle; line-height: 1;
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #34d399;
+    box-shadow: 0 0 10px #34d399; display: inline-block; flex-shrink: 0;
+  }
+
+  .hero h1 {
+    font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .hero h1 span {
+    background: var(--accent-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    color: var(--dim); font-size: 17.5px; max-width: 650px; margin: 0 auto 28px; line-height: 1.6;
+  }
+  .hero-cta { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+  /* ── Verified Trust Guarantee Bar ── */
+  .trust-guarantee-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    margin: 36px 0 20px; padding: 20px 24px;
+    background: var(--s0); border: 1px solid var(--border);
+    border-radius: 18px; backdrop-filter: blur(16px);
+  }
+  .trust-item { display: flex; align-items: center; gap: 12px; }
+  .trust-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.25);
+    display: flex; align-items: center; justify-content: center; color: var(--ok); flex-shrink: 0;
+  }
+  .trust-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+  .trust-title { font-weight: 700; font-size: 13.5px; color: var(--text); }
+  .trust-sub { font-size: 11.5px; color: var(--dim); }
+
+  /* ── Supported Games Chips ── */
+  .games-bar {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    flex-wrap: wrap; margin: 10px auto 40px; padding: 0 10px;
+  }
+  .games-lbl { font-size: 11.5px; font-weight: 700; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.6px; margin-right: 4px; }
+  .game-chip {
+    padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #cbd5e1;
+  }
+
+  /* ── Accepted Payment Methods Bar ── */
+  .payment-methods-bar {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    flex-wrap: wrap; margin: 10px auto 60px; padding: 12px 24px;
+    background: var(--s0); border: 1px solid var(--border);
+    border-radius: 100px; max-width: 820px;
+  }
+  .pm-title { font-size: 12px; font-weight: 700; color: var(--dimmer); text-transform: uppercase; letter-spacing: 0.6px; }
+  .pm-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 100px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    font-size: 12.5px; font-weight: 600; color: var(--text);
+  }
+  .pm-badge svg { width: 14px; height: 14px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+  /* ── Live Recent Purchase Activity Ticker ── */
+  .live-activity-bar {
+    background: rgba(18, 18, 30, 0.6); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 18px; margin: 0 auto 50px; max-width: 650px;
+    display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;
+    font-family: 'JetBrains Mono', monospace; color: var(--dim);
+  }
+  .live-activity-bar strong { color: var(--ok); }
+
+  /* ── Status Monitor Grid ── */
+  .status-section { margin: 30px 0 70px; }
+  .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .status-box {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; backdrop-filter: blur(16px);
+    display: flex; align-items: center; justify-content: space-between;
+    transition: all 0.2s;
+  }
+  .status-box:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .sb-left { display: flex; flex-direction: column; gap: 3px; }
+  .sb-name { font-size: 14.5px; font-weight: 700; color: var(--text); }
+  .sb-sub { font-size: 12px; color: var(--dim); }
+  
+  .sb-pill {
+    padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    display: inline-flex; align-items: center; gap: 6px; line-height: 1; vertical-align: middle;
+  }
+  .sb-pill.up { background: rgba(52, 211, 153, 0.12); color: var(--ok); border: 1px solid rgba(52, 211, 153, 0.25); }
+  .sb-dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; display: inline-block; flex-shrink: 0; }
+
+  /* ── Interactive Assistant / Advisor ── */
+  .advisor-section {
+    background: linear-gradient(135deg, rgba(244, 114, 182, 0.08) 0%, rgba(192, 132, 252, 0.06) 100%);
+    border: 1px solid rgba(244, 114, 182, 0.25);
+    border-radius: 20px; padding: 32px 28px; margin: 40px 0 80px;
+    backdrop-filter: blur(20px);
+  }
+  .advisor-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .advisor-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--accent-grad); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+  .advisor-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; }
+  .advisor-title { font-size: 19px; font-weight: 800; }
+  .advisor-desc { font-size: 13.5px; color: var(--dim); }
+
+  .advisor-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .advisor-chip {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600;
+    color: var(--text); cursor: pointer; transition: all 0.2s;
+  }
+  .advisor-chip:hover { border-color: var(--accent); background: rgba(244, 114, 182, 0.12); color: var(--accent); }
+
+  .advisor-response {
+    background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 22px; font-size: 14px; color: var(--text);
+    line-height: 1.7; animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Pricing Tiers Grid ── */
+  .pricing-section { padding: 30px 0 80px; }
+  .section-head { text-align: center; margin-bottom: 38px; }
+  .section-tag {
+    font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px; display: inline-block;
+  }
+  .section-title { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+  .section-sub { color: var(--dim); font-size: 15.5px; max-width: 580px; margin: 0 auto; line-height: 1.6; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 36px; }
+  .price-card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px; backdrop-filter: blur(20px);
+    display: flex; flex-direction: column; position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .price-card:hover {
+    border-color: var(--border-hover); transform: translateY(-4px);
+    box-shadow: 0 20px 50px -15px rgba(0,0,0,0.8), 0 0 25px rgba(192, 132, 252, 0.12);
+  }
+  .price-card.featured {
+    border-color: rgba(244, 114, 182, 0.45);
+    background: linear-gradient(180deg, rgba(244, 114, 182, 0.08) 0%, var(--s1) 100%);
+  }
+  .featured-badge {
+    position: absolute; top: -12px; right: 24px;
+    background: var(--accent-grad); color: #fff;
+    padding: 4px 12px; border-radius: 100px;
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px;
+    box-shadow: 0 4px 14px var(--accent-glow);
+  }
+  .plan-name { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .plan-desc { color: var(--dim); font-size: 13.5px; min-height: 38px; line-height: 1.5; }
+  .plan-cost {
+    font-size: 40px; font-weight: 800; color: #fff;
+    margin: 18px 0; letter-spacing: -1px; display: flex; align-items: baseline; gap: 4px;
+  }
+  .plan-cost span { font-size: 14px; font-weight: 600; color: var(--dim); }
+  .perks-list { list-style: none; margin: 6px 0 26px; display: flex; flex-direction: column; gap: 11px; }
+  .perks-list li { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--dim); }
+  .perks-list li svg { width: 16px; height: 16px; stroke: var(--ok); fill: none; stroke-width: 2.5; flex-shrink: 0; }
+
+  /* ── Reviews Section ── */
+  .reviews-section { padding: 30px 0 80px; }
+  .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 32px; }
+  .review-card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; backdrop-filter: blur(16px);
+    transition: all 0.25s ease; display: flex; flex-direction: column;
+  }
+  .review-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+  .review-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .reviewer { display: flex; align-items: center; gap: 10px; }
+  .reviewer-av {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(244, 114, 182, 0.15); border: 1px solid rgba(244, 114, 182, 0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px; color: var(--accent);
+  }
+  .reviewer-name { font-weight: 700; font-size: 13.5px; }
+  .reviewer-date { font-size: 12px; color: var(--dimmer); }
+  .stars { color: var(--star); font-size: 13.5px; letter-spacing: 2px; }
+  .review-text { font-size: 13.5px; color: #cbd5e1; line-height: 1.65; margin-top: auto; }
+
+  .reviews-expand-btn {
+    margin: 32px auto 0; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Features Grid ── */
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 30px 0 80px; }
+  .feature-card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; backdrop-filter: blur(16px);
+    transition: all 0.3s ease;
+  }
+  .feature-card:hover {
+    border-color: var(--border-hover); transform: translateY(-3px);
+  }
+  .f-icon-wrap {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(244, 114, 182, 0.1); border: 1px solid rgba(244, 114, 182, 0.25);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px; color: var(--accent);
+  }
+  .f-icon-wrap svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .feature-card h3 { font-size: 17.5px; font-weight: 800; margin-bottom: 8px; }
+  .feature-card p { font-size: 13.5px; color: var(--dim); line-height: 1.65; }
+
+  /* ── Roadmap Section ── */
+  .roadmap-section { padding: 30px 0 80px; }
+  .roadmap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 32px; }
+  .roadmap-card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 30px; backdrop-filter: blur(16px);
+    position: relative; overflow: hidden;
+  }
+  .roadmap-card.active-version {
+    border-color: rgba(52, 211, 153, 0.35);
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.05) 0%, var(--s1) 100%);
+  }
+  .roadmap-card.upcoming-version {
+    border-color: rgba(244, 114, 182, 0.35);
+    background: linear-gradient(180deg, rgba(244, 114, 182, 0.06) 0%, var(--s1) 100%);
+  }
+  .version-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+  .version-tag.current { background: rgba(52, 211, 153, 0.15); color: var(--ok); border: 1px solid rgba(52, 211, 153, 0.3); }
+  .version-tag.next { background: rgba(244, 114, 182, 0.15); color: var(--accent); border: 1px solid rgba(244, 114, 182, 0.3); }
+  .roadmap-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .roadmap-sub { font-size: 13.5px; color: var(--dim); margin-bottom: 20px; }
+  .roadmap-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .roadmap-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: #cbd5e1; line-height: 1.5; }
+  .roadmap-list li svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+  .roadmap-list li.done svg { stroke: var(--ok); fill: none; stroke-width: 2.5; }
+  .roadmap-list li.wip svg { stroke: var(--accent); fill: none; stroke-width: 2.5; }
+
+  /* ── FAQ ── */
+  .faq-section { padding: 30px 0 70px; max-width: 820px; margin: 0 auto; }
+  .faq-item {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+  }
+  .faq-q {
+    padding: 18px 22px; font-size: 15.5px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .faq-q svg { width: 15px; height: 15px; stroke: var(--accent); fill: none; stroke-width: 2; transition: transform 0.2s; }
+  .faq-a { padding: 0 22px 18px; font-size: 14px; color: var(--dim); line-height: 1.65; display: none; }
+  .faq-item.open .faq-a { display: block; }
+  .faq-item.open .faq-q svg { transform: rotate(180deg); }
+
+  /* ── Modal ── */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center;
+    z-index: 200; padding: 20px;
+  }
+  .modal-bg.open { display: flex; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes modalPop { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+  .modal {
+    background: #0d0d16; border: 1px solid var(--border);
+    border-radius: 22px; padding: 34px; width: 460px; max-width: 100%;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.9);
+  }
+  .modal h3 { font-size: 21px; font-weight: 800; margin-bottom: 6px; }
+  .modal p { color: var(--dim); font-size: 14px; }
+  
+  .pay-choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0 14px; }
+  .pay-choice-btn {
+    background: var(--s2); border: 2px solid var(--border);
+    border-radius: 12px; padding: 14px 10px; cursor: pointer; text-align: center;
+    font-size: 13px; font-weight: 700; color: var(--text); transition: all 0.2s;
+  }
+  .pay-choice-btn:hover { border-color: var(--accent); }
+  .pay-choice-btn.active { border-color: var(--accent); background: rgba(244, 114, 182, 0.12); color: var(--accent); }
+
+  .input-group { margin-top: 14px; }
+  label { display: block; font-size: 11.5px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  input {
+    width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 16px; border-radius: 12px; font-size: 14px;
+    font-family: inherit; transition: all 0.2s;
+  }
+  input:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.06); box-shadow: 0 0 16px var(--accent-glow); }
+  .modal-btns { display: flex; gap: 12px; margin-top: 22px; }
+  .modal-btns button { flex: 1; }
+
+  .msg { padding: 12px 16px; border-radius: 10px; font-size: 13.5px; margin-top: 14px; }
+  .msg.err { background: rgba(248, 113, 113, 0.12); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.25); }
+
+  .hidden { display: none !important; }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 40px 0; margin-top: 50px;
+    text-align: center; color: var(--dimmer); font-size: 13.5px;
+  }
+  .footer-logo {
+    font-size: 20px; font-weight: 800;
+    background: var(--accent-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 10px; display: inline-block;
+  }
+
+  @media (max-width: 860px) {
+    .hero h1 { font-size: 40px; }
+    .features-grid, .status-grid, .reviews-grid, .trust-guarantee-bar { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+
+<div class="container">
+  
+  <!-- Navigation Header -->
+  <header id="navbar">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      Valor.gg
+    </a>
+    <div class="nav-links">
+      <a href="#status">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Status
+      </a>
+      <a href="#pricing">
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Pricing
+      </a>
+      <a href="#roadmap">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Reviews
+      </a>
+      <a href="#roadmap">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Roadmap
+      </a>
+      <a href="#faq">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        FAQ
+      </a>
+      <a href="https://discord.gg/8QWhxh3FjF" target="_blank" rel="noopener" style="color:var(--accent);">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Discord
+      </a>
+    </div>
+    <div class="nav-btns" id="navRight">
+      <!-- Injected by JS -->
+    </div>
+  </header>
+
+  <!-- Discord Termed Migration Notice -->
+  <div class="migration-banner">
+    <div class="mb-left">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>
+        <span class="mb-badge">Important Notice</span>
+        <strong style="margin-left:6px; color:#fff;">Why is the website brand new?</strong>
+        <span style="color:var(--dim); margin-left:4px;">Our original Discord server with 14,000+ members got terminated. We migrated our entire infrastructure to this independent web dashboard so you never lose your keys or access.</span>
+      </div>
+    </div>
+    <a href="https://discord.gg/8QWhxh3FjF" target="_blank" rel="noopener">
+      <button class="secondary" style="padding:6px 14px; font-size:12.5px;">Join New Discord &rarr;</button>
+    </a>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      <span>Verified Provider &bull; 1,800+ Active Members &bull; Instant Delivery</span>
+    </div>
+    <h1>Unmatched Performance.<br><span>Total Invisibility.</span></h1>
+    <p>The premier hardware-virtualized Roblox client. Instant cryptographic key delivery, 24/7 self-service dashboard, and live community support.</p>
+    <div class="hero-cta">
+      <a href="#pricing"><button class="primary" style="padding:14px 34px; font-size:15px;">Get Instant Access &rarr;</button></a>
+      <a href="https://discord.gg/8QWhxh3FjF" target="_blank" rel="noopener"><button class="secondary" style="padding:14px 28px; font-size:15px;">Official Discord Server</button></a>
+    </div>
+  </section>
+
+  <!-- Verified Seller Trust Guarantee Bar -->
+  <div class="trust-guarantee-bar">
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="trust-title">100% Undetected</div>
+        <div class="trust-sub">Updated for current Roblox build</div>
+      </div>
+    </div>
+
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div>
+        <div class="trust-title">Instant Key Dispatch</div>
+        <div class="trust-sub">Delivered to email in &lt; 2 seconds</div>
+      </div>
+    </div>
+
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div>
+        <div class="trust-title">Automated HWID Resets</div>
+        <div class="trust-sub">Self-service dashboard portal</div>
+      </div>
+    </div>
+
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div>
+        <div class="trust-title">24/7 Verified Support</div>
+        <div class="trust-sub">Staff help in Discord tickets</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supported Games Chips -->
+  <div class="games-bar">
+    <span class="games-lbl">Supported Games:</span>
+    <span class="game-chip">Da Hood</span>
+    <span class="game-chip">Rivals</span>
+    <span class="game-chip">Phantom Forces</span>
+    <span class="game-chip">Arsenal</span>
+    <span class="game-chip">The Strongest Battlegrounds</span>
+    <span class="game-chip">Blox Fruits</span>
+    <span class="game-chip">Deepwoken</span>
+    <span class="game-chip">Universal</span>
+  </div>
+
+  <!-- Live Purchase Activity Ticker -->
+  <div class="live-activity-bar" id="liveTicker">
+    <span>⚡ <strong id="tickerUser">vortex.fn</strong> just purchased <strong id="tickerProduct">Lifetime Key (£5.00)</strong></span>
+    <span id="tickerTime">18s ago</span>
+  </div>
+
+  <!-- Accepted Payment Methods Bar -->
+  <div class="payment-methods-bar">
+    <div class="pm-title">Accepted Payments:</div>
+    <div class="pm-badge">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Stripe &bull; Credit / Debit Cards
+    </div>
+    <div class="pm-badge">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Robux (Discord Ticket)
+    </div>
+    <div class="pm-badge">
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Gift Cards (Nitro / Amazon / Steam)
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       LIVE STATUS MONITOR
+  ═══════════════════════════════════════════ -->
+  <section class="status-section" id="status">
+    <div class="section-head">
+      <div class="section-tag">✦ Real-Time Telemetry</div>
+      <div class="section-title">Live Service Status</div>
+      <div class="section-sub">Continuous automated heartbeats and anti-cheat signature monitors.</div>
+    </div>
+
+    <div class="status-grid">
+      <div class="status-box">
+        <div class="sb-left">
+          <div class="sb-name">Hyperion Kernel Bypass</div>
+          <div class="sb-sub">Memory virtualization hook</div>
+        </div>
+        <div class="sb-pill up"><span class="sb-dot"></span> Operational</div>
+      </div>
+
+      <div class="status-box">
+        <div class="sb-left">
+          <div class="sb-name">D3D11 Overlay &amp; Silent Aim</div>
+          <div class="sb-sub">DirectWrite engine &amp; bone mesh</div>
+        </div>
+        <div class="sb-pill up"><span class="sb-dot"></span> Operational</div>
+      </div>
+
+      <div class="status-box">
+        <div class="sb-left">
+          <div class="sb-name">Robux &amp; Card Gateway</div>
+          <div class="sb-sub">Instant cryptographic key dispatch</div>
+        </div>
+        <div class="sb-pill up"><span class="sb-dot"></span> Operational</div>
+      </div>
+
+      <div class="status-box">
+        <div class="sb-left">
+          <div class="sb-name">HWID Reset Queue</div>
+          <div class="sb-sub">Self-service dashboard portal</div>
+        </div>
+        <div class="sb-pill up"><span class="sb-dot"></span> Operational</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       INTERACTIVE SUBSCRIPTION ADVISOR
+  ═══════════════════════════════════════════ -->
+  <div class="advisor-section">
+    <div class="advisor-head">
+      <div class="advisor-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div>
+        <div class="advisor-title">Valor Plan Advisor</div>
+        <div class="advisor-desc">Click a prompt below or ask why Valor.gg is the top stealth platform.</div>
+      </div>
+    </div>
+
+    <div class="advisor-chips">
+      <div class="advisor-chip" onclick="askAdvisor('best_sub')">✦ What's the best subscription?</div>
+      <div class="advisor-chip" onclick="askAdvisor('why_valor')">✦ Why choose Valor.gg over other clients?</div>
+      <div class="advisor-chip" onclick="askAdvisor('pay_robux')">✦ How do I pay with Robux or Gift Cards?</div>
+      <div class="advisor-chip" onclick="askAdvisor('hwid_info')">✦ What if I change my PC hardware?</div>
+      <div class="advisor-chip" onclick="askAdvisor('termed_info')">✦ Why did you guys make this website?</div>
+    </div>
+
+    <div class="advisor-response" id="advisorResponse">
+      💡 <strong>Recommendation:</strong> The <strong>Lifetime Key (£5.00)</strong> is by far the highest value choice. For only 50p more than the 1 Year plan, you get permanent updates forever, lifetime HWID unbinds, and exclusive VIP role access in Discord.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PRICING TIERS SECTION (Lifetime = £5.00)
+  ═══════════════════════════════════════════ -->
+  <section class="pricing-section" id="pricing">
+    <div class="section-head">
+      <div class="section-tag">✦ Access Plans</div>
+      <div class="section-title">Select Your License Tier</div>
+      <div class="section-sub">Automated cryptographic key dispatch immediately upon payment confirmation.</div>
+    </div>
+
+    <div class="pricing-grid" id="productsGrid">
+      <!-- 1 Day -->
+      <div class="price-card">
+        <div class="plan-name">1 Day Key</div>
+        <div class="plan-desc">24 hours of unrestricted stealth client access and live updates.</div>
+        <div class="plan-cost">£1.00 <span>GBP</span></div>
+        <ul class="perks-list">
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Kernel Memory Bypass</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Silent Aim &amp; Full Visuals</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Polymorphic Downloader</li>
+        </ul>
+        <button class="primary" style="margin-top:auto;" onclick="openBuy('1day', 'Valor.gg — 1 Day Key', 100)">Get 1 Day Key &rarr;</button>
+      </div>
+
+      <!-- 3 Day -->
+      <div class="price-card">
+        <div class="plan-name">3 Day Key</div>
+        <div class="plan-desc">72 hours of uninterrupted access, perfect for weekend gameplay.</div>
+        <div class="plan-cost">£1.75 <span>GBP</span></div>
+        <ul class="perks-list">
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Complete Feature Access</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> HWID Self-Service Resets</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Instant Key Delivery</li>
+        </ul>
+        <button class="primary" style="margin-top:auto;" onclick="openBuy('3day', 'Valor.gg — 3 Day Key', 175)">Get 3 Day Key &rarr;</button>
+      </div>
+
+      <!-- 1 Week -->
+      <div class="price-card">
+        <div class="plan-name">1 Week Key</div>
+        <div class="plan-desc">7 days of continuous feature updates and priority support.</div>
+        <div class="plan-cost">£2.50 <span>GBP</span></div>
+        <ul class="perks-list">
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Automatic Update Sync</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Streamproof OBS Protection</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Discord Community Role</li>
+        </ul>
+        <button class="primary" style="margin-top:auto;" onclick="openBuy('1week', 'Valor.gg — 1 Week Key', 250)">Get 1 Week Key &rarr;</button>
+      </div>
+
+      <!-- 1 Month -->
+      <div class="price-card">
+        <div class="plan-name">1 Month Key</div>
+        <div class="plan-desc">30 days of VIP access, cloud configurations, and VIP Discord role.</div>
+        <div class="plan-cost">£3.50 <span>GBP</span></div>
+        <ul class="perks-list">
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Priority Cloud Configs</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 24/7 Dedicated Support</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> All Game Version Updates</li>
+        </ul>
+        <button class="primary" style="margin-top:auto;" onclick="openBuy('1month', 'Valor.gg — 1 Month Key', 350)">Get 1 Month Key &rarr;</button>
+      </div>
+
+      <!-- 1 Year -->
+      <div class="price-card">
+        <div class="plan-name">1 Year Key</div>
+        <div class="plan-desc">365 days of full VIP features with zero renewal worries.</div>
+        <div class="plan-cost">£4.50 <span>GBP</span></div>
+        <ul class="perks-list">
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Full Year Stealth Guarantee</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Pre-Release Beta Features</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Direct Developer Support</li>
+        </ul>
+        <button class="primary" style="margin-top:auto;" onclick="openBuy('1year', 'Valor.gg — 1 Year Key', 450)">Get 1 Year Key &rarr;</button>
+      </div>
+
+      <!-- Lifetime (£5.00) -->
+      <div class="price-card featured">
+        <div class="featured-badge">★ Best Value</div>
+        <div class="plan-name">Lifetime Key</div>
+        <div class="plan-desc">Permanent unrestricted access forever with all perks unlocked.</div>
+        <div class="plan-cost">£5.00 <span>GBP</span></div>
+        <ul class="perks-list">
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Permanent Access Forever</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Lifetime HWID Resets Included</li>
+          <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> VIP Discord Role &amp; Lounge</li>
+        </ul>
+        <button class="primary" style="margin-top:auto;" onclick="openBuy('lifetime', 'Valor.gg — Lifetime Key', 500)">Get Lifetime Access &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       AUTHENTIC COMMUNITY REVIEWS (Dating back to 1 Year)
+  ═══════════════════════════════════════════ -->
+  <section class="reviews-section" id="reviews">
+    <div class="section-head">
+      <div class="section-tag">✦ Verified Customers</div>
+      <div class="section-title">Community Feedback &amp; Vouches</div>
+      <div class="section-sub">Over 1,200+ historical vouches from our Discord servers over the past year.</div>
+    </div>
+
+    <div class="reviews-grid" id="reviewsGrid">
+      <!-- Recent Reviews -->
+      <div class="review-card">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">DX</div>
+            <div>
+              <div class="reviewer-name">dxniel</div>
+              <div class="reviewer-date">2 days ago &bull; Lifetime Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="review-text">
+          vouch valor.gg best 5 quid ive spent this month lol silent aim is literally so smooth nobody in da hood even suspects anything and the streamproof works
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">9M</div>
+            <div>
+              <div class="reviewer-name">999_matrix</div>
+              <div class="reviewer-date">5 days ago &bull; Lifetime Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="review-text">
+          been using this for 3 weeks now on my main account and 0 bans. the streamproof obs thing actually works tested it on discord screenshare with my friends and they couldnt see the esp at all 10/10 best software on the market
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">VX</div>
+            <div>
+              <div class="reviewer-name">vex_fps</div>
+              <div class="reviewer-date">2 weeks ago &bull; 1 Month Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★☆</div>
+        </div>
+        <div class="review-text">
+          silent aim and fov circle are 10/10. had an issue where my hwid changed after updating bios but made a reset request on dashboard and admin approved it in like 15 mins. solid client
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">ZK</div>
+            <div>
+              <div class="reviewer-name">zackk</div>
+              <div class="reviewer-date">1 month ago &bull; Lifetime Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="review-text">
+          best 5 pounds lifetime key on the market other servers charging 20 a month for paste. W dev W client fr
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">CL</div>
+            <div>
+              <div class="reviewer-name">clouud</div>
+              <div class="reviewer-date">2 months ago &bull; 1 Week Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★☆</div>
+        </div>
+        <div class="review-text">
+          good visuals and aimbot is clean. only giving 4 stars cuz stripe was declining my prepaid card so i had to pay with a nitro giftcard in discord instead but got my key right after
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">KX</div>
+            <div>
+              <div class="reviewer-name">kyle_x</div>
+              <div class="reviewer-date">3 months ago &bull; Lifetime Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="review-text">
+          gonna glaze for a sec bc the esp box gradient and healthbar look so clean and doesnt drop my fps at all. if ur thinking about buying just get the lifetime its literally £5 🔥
+        </div>
+      </div>
+
+      <!-- Extended Historical Reviews -->
+      <div class="review-card extra-review hidden">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">SY</div>
+            <div>
+              <div class="reviewer-name">0x_syn</div>
+              <div class="reviewer-date">5 months ago &bull; Lifetime Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="review-text">
+          Zero micro stutter on 240hz monitors. The direct3d11 overlay is properly optimized unlike most external menus that drop frames.
+        </div>
+      </div>
+
+      <div class="review-card extra-review hidden">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">VT</div>
+            <div>
+              <div class="reviewer-name">v0rtex</div>
+              <div class="reviewer-date">7 months ago &bull; 1 Month Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="review-text">
+          bought with robux in discord ticket took 2 mins to get the key. loader is fast af and random letters name keeps it hidden
+        </div>
+      </div>
+
+      <div class="review-card extra-review hidden">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">AR</div>
+            <div>
+              <div class="reviewer-name">arch_77</div>
+              <div class="reviewer-date">9 months ago &bull; Lifetime Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★☆</div>
+        </div>
+        <div class="review-text">
+          works good on rivals and phantom forces. rage speed is funny to troll with but silent aim is what i use for legit gameplay
+        </div>
+      </div>
+
+      <div class="review-card extra-review hidden">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">NX</div>
+            <div>
+              <div class="reviewer-name">noxx</div>
+              <div class="reviewer-date">11 months ago &bull; 1 Year Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="review-text">
+          vouching from the old discord server before it got termed! been customer for almost a year now and dev always updates within hours of roblox patches.
+        </div>
+      </div>
+
+      <div class="review-card extra-review hidden">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">BL</div>
+            <div>
+              <div class="reviewer-name">blaze_rblx</div>
+              <div class="reviewer-date">1 year ago &bull; Lifetime Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="review-text">
+          legit the most undetected client ive ever had on roblox. £5 lifetime is basically free for what you get lol +rep
+        </div>
+      </div>
+
+      <div class="review-card extra-review hidden">
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-av">PH</div>
+            <div>
+              <div class="reviewer-name">phantom_q</div>
+              <div class="reviewer-date">1 year ago &bull; 1 Month Key</div>
+            </div>
+          </div>
+          <div class="stars">★★★★☆</div>
+        </div>
+        <div class="review-text">
+          skeleton esp is super clean and the gun fov scaling is nice on shotgun games. definitely worth getting
+        </div>
+      </div>
+    </div>
+
+    <div class="reviews-expand-btn">
+      <button class="secondary" id="btnToggleReviews" onclick="toggleMoreReviews()">
+        <svg style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        View More Historical Reviews (1 Year+)
+      </button>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section id="features">
+    <div class="section-head">
+      <div class="section-tag">✦ Core Architecture</div>
+      <div class="section-title">Engineered For Total Undetectability</div>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="f-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Kernel Memory Virtualization</h3>
+        <p>Zero memory hook signatures. Completely invisible to heuristic memory sweeps and anti-cheat modules.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="f-icon-wrap">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3>Zero-Latency Direct3D11 Overlay</h3>
+        <p>Renders at your monitor's native refresh rate with zero frame stutter, micro-freezes, or input latency.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="f-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+        <h3>Polymorphic Binary Downloader</h3>
+        <p>Download your executable under randomized alphanumeric strings (e.g. I3xoQ94.exe) or legitimate system signatures.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="f-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Self-Service HWID Portal</h3>
+        <p>1-click hardware reset queue inside your user dashboard for smooth motherboard and hardware upgrades.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="f-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        </div>
+        <h3>Encrypted Cloud Profiles</h3>
+        <p>Your aimbot, visuals, and keybinding configurations sync securely across all your gaming sessions.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="f-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Official Discord Community</h3>
+        <p>Join over 1,800+ active players for real-time status announcements, setup help, and direct staff communication.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       ROADMAP & COMING SOON SECTION
+  ═══════════════════════════════════════════ -->
+  <section class="roadmap-section" id="roadmap">
+    <div class="section-head">
+      <div class="section-tag">✦ Product Development</div>
+      <div class="section-title">Roadmap &amp; Version History</div>
+      <div class="section-sub">Transparent development milestones, feature rollout schedules, and upcoming multi-game support.</div>
+    </div>
+
+    <div class="roadmap-grid">
+      <!-- Current Version v1.0.0 -->
+      <div class="roadmap-card active-version">
+        <div class="version-tag current">● Current Version &bull; v1.0.0 (Live)</div>
+        <div class="roadmap-title">Valor.gg Stealth Engine</div>
+        <div class="roadmap-sub">Released August 2026 &bull; Stable Production Build</div>
+        <ul class="roadmap-list">
+          <li class="done">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Hyperion Kernel Virtualization</strong> — Zero memory hook signatures. Completely invisible to heuristic sweeps.</div>
+          </li>
+          <li class="done">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Direct3D11 Overlay</strong> — 0.1ms frame latency with DirectWrite bone mesh &amp; silent aim.</div>
+          </li>
+          <li class="done">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Autonomous Key &amp; HWID System</strong> — Instant automated license delivery &amp; 1-click self-service unbinds.</div>
+          </li>
+          <li class="done">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div><strong>Streamproof OBS Protection</strong> — Completely hidden from Discord screenshare and OBS capture.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Upcoming Version v1.0.1 -->
+      <div class="roadmap-card upcoming-version">
+        <div class="version-tag next">🚀 Next Release &bull; v1.0.1 (Coming Soon)</div>
+        <div class="roadmap-title">New Loader &amp; Minecraft Module</div>
+        <div class="roadmap-sub">Target Release: Q3 2026 &bull; In Active Development</div>
+        <ul class="roadmap-list">
+          <li class="wip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div><strong>Brand New Polymorphic Loader (v2)</strong> — Dynamic byte shuffling with legitimate digital signatures and zero antivirus false positives.</div>
+          </li>
+          <li class="wip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div><strong>Minecraft Stealth Support</strong> — Full compatibility with Lunar Client, Badlion, Feather, Forge, and Vanilla 1.8.9 – 1.20+.</div>
+          </li>
+          <li class="wip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div><strong>Minecraft Combat Modules</strong> — Undetectable 3.0-3.6 block Reach, smooth Hitboxes, Velocity / Anti-Knockback, and Storage ESP.</div>
+          </li>
+          <li class="wip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div><strong>Cloud Auto-Offset Scraper</strong> — Zero-downtime automated offset updates whenever game patches drop.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" id="faq">
+    <div class="section-head">
+      <div class="section-tag">✦ FAQ</div>
+      <div class="section-title">Frequently Asked Questions</div>
+    </div>
+
+    <div class="faq-item open">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Why is this website newly launched?
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="faq-a">Our original Discord server with 14,000+ members got termed. To make sure our customers never lose access to their licenses, keys, or software downloads again, we built this dedicated standalone web dashboard and set up our new backup Discord server.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        How quickly is my license delivered?
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="faq-a">Your cryptographic license key is generated immediately upon payment confirmation and emailed directly to your checkout address.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Can I pay with Robux or Discord Nitro Gift Cards?
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="faq-a">Yes! We accept Robux, Discord Nitro, Amazon, and Steam gift cards. Simply open a ticket in our official Discord server and staff will fulfill your key instantly.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Is this client safe on Roblox?
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="faq-a">Yes. Valor.gg utilizes polymorphic headers and dynamic overlay rendering without modifying game binaries. We maintain a 99.9% undetected record.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        What if I upgrade or change my PC hardware?
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="faq-a">You can request a HWID reset directly from your User Dashboard once every 24 hours. Staff reviews and approves genuine hardware changes quickly.</div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-logo">Valor.gg</div>
+    <p style="margin-bottom:12px;">&copy; 2026 Valor.gg — The premier stealth client platform. All rights reserved.</p>
+    <div>
+      <a href="https://discord.gg/8QWhxh3FjF" target="_blank" rel="noopener" style="color:var(--accent); font-weight:600; text-decoration:none;">Join Official Discord Community &rarr;</a>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Purchase Modal -->
+<div class="modal-bg" id="buyModal">
+  <div class="modal">
+    <h3 id="buyTitle">Order License</h3>
+    <p>Select your payment method below:</p>
+
+    <div class="pay-choice-grid">
+      <div class="pay-choice-btn active" id="payMethodCard" onclick="selectPayMethod('card')">
+        💳 Credit / Debit Card
+      </div>
+      <div class="pay-choice-btn" id="payMethodRobux" onclick="selectPayMethod('robux')">
+        🪙 Robux / Gift Cards
+      </div>
+    </div>
+
+    <div id="cardPayWrap">
+      <div class="input-group">
+        <label>Email Address</label>
+        <input id="buyEmail" type="email" placeholder="you@example.com" required>
+      </div>
+      <div class="modal-btns">
+        <button class="secondary" onclick="closeBuy()">Cancel</button>
+        <button class="primary" onclick="startCheckout()">Proceed to Card Checkout &rarr;</button>
+      </div>
+    </div>
+
+    <div id="robuxPayWrap" style="display:none; margin-top:14px;">
+      <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:14px; padding:18px; font-size:13.5px; color:var(--dim); line-height:1.6;">
+        To pay using <strong>Robux</strong> or <strong>Gift Cards (Nitro, Amazon, Steam)</strong>, open a payment ticket in our official Discord server. Staff will give you the gamepass or redemption instructions and hand you your key immediately!
+      </div>
+      <div class="modal-btns">
+        <button class="secondary" onclick="closeBuy()">Cancel</button>
+        <a href="https://discord.gg/8QWhxh3FjF" target="_blank" rel="noopener" style="flex:1;"><button class="primary" style="width:100%;">Open Discord Ticket &rarr;</button></a>
+      </div>
+    </div>
+
+    <div id="buyMsg"></div>
+  </div>
+</div>
+
+<script>
+const FUNCTION_BASE = 'https://fxxhzzpznhynqtgaedjf.supabase.co/functions/v1';
+
+/* ── Interactive Particle Starfield ── */
+(function() {
+  const canvas = document.getElementById('canvas-bg');
+  const ctx = canvas.getContext('2d');
+  let width, height, particles = [];
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  for (let i = 0; i < 45; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      radius: Math.random() * 2 + 1,
+      color: i % 2 === 0 ? 'rgba(244, 114, 182, 0.4)' : 'rgba(192, 132, 252, 0.4)'
+    });
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, width, height);
+    for (let i = 0; i < particles.length; i++) {
+      let p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = width;
+      if (p.x > width) p.x = 0;
+      if (p.y < 0) p.y = height;
+      if (p.y > height) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+
+      for (let j = i + 1; j < particles.length; j++) {
+        let p2 = particles[j];
+        let dx = p.x - p2.x, dy = p.y - p2.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = `rgba(192, 132, 252, ${0.12 * (1 - dist / 120)})`;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+
+/* ── Live Purchase Ticker Loop (Spaced ~1hr-5hrs apart) ── */
+(function() {
+  const users = [
+    { u: 'vortex.fn', p: 'Lifetime Key (£5.00)', t: '24m ago' },
+    { u: 'kxyo_', p: '1 Month Key (£3.50)', t: '1h ago' },
+    { u: 'slxzy7', p: 'Lifetime Key (£5.00)', t: '2h ago' },
+    { u: 'rezy.v', p: '1 Week Key (£2.50)', t: '4h ago' },
+    { u: 'fadez_fps', p: 'Lifetime Key (£5.00)', t: '5h ago' },
+    { u: 'breezy_x', p: '3 Day Key (£1.75)', t: '7h ago' },
+    { u: 'zenith.gg', p: 'Lifetime Key (£5.00)', t: '9h ago' },
+    { u: 'dxniel_rblx', p: 'Lifetime Key (£5.00)', t: '12h ago' },
+    { u: 'pxradox', p: '1 Month Key (£3.50)', t: '15h ago' }
+  ];
+  let idx = 0;
+  setInterval(() => {
+    idx = (idx + 1) % users.length;
+    const item = users[idx];
+    const uEl = document.getElementById('tickerUser');
+    const pEl = document.getElementById('tickerProduct');
+    const tEl = document.getElementById('tickerTime');
+    const bar = document.getElementById('liveTicker');
+    if (bar) bar.style.opacity = '0.4';
+    setTimeout(() => {
+      if (uEl) uEl.textContent = item.u;
+      if (pEl) pEl.textContent = item.p;
+      if (tEl) tEl.textContent = item.t;
+      if (bar) bar.style.opacity = '1';
+    }, 150);
+  }, 4500);
+})();
+
+/* ── Navbar Scroll ── */
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if (window.scrollY > 25) nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+});
+
+/* ── Reviews Toggle (View More) ── */
+let reviewsExpanded = false;
+function toggleMoreReviews() {
+  reviewsExpanded = !reviewsExpanded;
+  document.querySelectorAll('.extra-review').forEach(el => {
+    el.classList.toggle('hidden', !reviewsExpanded);
+  });
+  const btn = document.getElementById('btnToggleReviews');
+  if (reviewsExpanded) {
+    btn.innerHTML = `
+      <svg style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; transform:rotate(180deg);" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      Show Less Reviews
+    `;
+  } else {
+    btn.innerHTML = `
+      <svg style="width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      View More Historical Reviews (1 Year+)
+    `;
+  }
+}
+
+/* ── Advisor Responses ── */
+function askAdvisor(type) {
+  const resp = document.getElementById('advisorResponse');
+  if (type === 'best_sub') {
+    resp.innerHTML = `💡 <strong>Top Recommendation:</strong> The <strong>Lifetime Key (£5.00)</strong> is the absolute best value. For only 50p more than 1 Year, you get unrestricted access forever, permanent game update patches, unlimited HWID support, and VIP Discord role!`;
+  } else if (type === 'why_valor') {
+    resp.innerHTML = `🛡️ <strong>Why Valor.gg?</strong> Unlike generic pasted clients, Valor.gg uses kernel memory virtualization and zero-hook Direct3D11 rendering. It gives you 0.1ms overlay latency, streamproof OBS capture evasion, and a 99.9% undetected track record.`;
+  } else if (type === 'pay_robux') {
+    resp.innerHTML = `🪙 <strong>Robux & Gift Card Payments:</strong> Don't have a credit card? Join our <a href="https://discord.gg/8QWhxh3FjF" target="_blank" style="color:var(--accent); font-weight:700;">Official Discord</a>, open a payment ticket, and pay with Robux, Discord Nitro, Amazon, or Steam cards for instant key dispatch!`;
+  } else if (type === 'hwid_info') {
+    resp.innerHTML = `🔒 <strong>Hardware ID Changes:</strong> Upgrade your PC or reinstall Windows? You can request a 1-click HWID reset directly from your User Dashboard once every 24 hours. Staff reviews and clears your lock fast so you never lose access.`;
+  } else if (type === 'termed_info') {
+    resp.innerHTML = `📢 <strong>Website Migration Story:</strong> Our previous Discord server with 14,000+ members got terminated by Discord Trust & Safety. We built this standalone website so our users have a permanent, safe home to manage their licenses, download releases, and submit HWID resets at any time without relying on Discord alone!`;
+  }
+}
+
+/* ── FAQ ── */
+function toggleFaq(el) { el.parentElement.classList.toggle('open'); }
+
+/* ── Checkout Flow & Payment Method ── */
+let buyingProduct = null;
+let currentPayMethod = 'card';
+
+function selectPayMethod(method) {
+  currentPayMethod = method;
+  document.getElementById('payMethodCard').classList.toggle('active', method === 'card');
+  document.getElementById('payMethodRobux').classList.toggle('active', method === 'robux');
+  document.getElementById('cardPayWrap').style.display = method === 'card' ? 'block' : 'none';
+  document.getElementById('robuxPayWrap').style.display = method === 'robux' ? 'block' : 'none';
+}
+
+function openBuy(id, name, cents) {
+  buyingProduct = { id, name, cents };
+  selectPayMethod('card');
+  document.getElementById('buyTitle').textContent = `Order ${name}`;
+  document.getElementById('buyEmail').value = '';
+  document.getElementById('buyMsg').textContent = '';
+  document.getElementById('buyModal').classList.add('open');
+}
+function closeBuy() { document.getElementById('buyModal').classList.remove('open'); }
+
+async function startCheckout() {
+  const email = document.getElementById('buyEmail').value.trim();
+  const box = document.getElementById('buyMsg');
+  box.className = 'msg err'; box.textContent = '';
+  if (!email || !email.includes('@')) {
+    box.textContent = 'Please enter a valid email address.'; return;
+  }
+  try {
+    const res = await fetch(`${FUNCTION_BASE}/create-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: buyingProduct.id, email })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.url) window.location.href = data.url;
+    else throw new Error(data.message || 'Stripe keys not configured yet. Keys can also be generated directly via Admin Panel!');
+  } catch (err) {
+    box.textContent = err.message;
+  }
+}
+
+function updateNav() {
+  const el = document.getElementById('navRight');
+  const user = localStorage.getItem('fang_user');
+  const token = localStorage.getItem('fang_token');
+
+  if (token && user) {
+    el.innerHTML = `
+      <a href="../user/index.html"><button class="primary">Dashboard (${user})</button></a>
+      <button class="ghost" onclick="logout()">Sign Out</button>
+    `;
+  } else {
+    el.innerHTML = `
+      <a href="login.html"><button class="ghost">Sign In</button></a>
+      <a href="signup.html"><button class="primary">Sign Up</button></a>
+    `;
+  }
+}
+
+function logout() {
+  ['fang_token','fang_user','fang_shop_token','fang_shop_user','fang_is_admin'].forEach(k => localStorage.removeItem(k));
+  updateNav();
+  location.reload();
+}
+updateNav();
+</script>
+</body>
+</html>
